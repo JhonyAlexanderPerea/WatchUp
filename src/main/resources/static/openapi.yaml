@@ -1,0 +1,441 @@
+openapi: 3.1.0
+info:
+  title: WhatchUp
+  description:  WhatchUp (API para la gestión de reportes de seguridad ciudadana y bienestar comunitario.)
+  version: 1.0.0
+servers:
+  - url: 'https//localhost:8080/WhatchUpAPI/v1'
+    description: Servidor de la API demo
+paths:
+  /auth/register:
+    post:
+      summary: Registrar un nuevo usuario.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: "Usuario registrado con éxito"
+        "400":
+          description: "Error en los datos enviados"
+  /auth/login:
+    post:
+      summary: Iniciar sesión (Autenticar un usuario).
+      operationId: login
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/LoginRequest"
+      responses:
+        "200":
+          description: "Autenticación exitosa"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+        "401":
+          description: "Credenciales inválidas"
+  /users:
+    get:
+      summary: Obtener todos los usuarios.
+      operationId: getUsers
+      responses:
+        "200":
+          description: "Lista de usuarios"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/UserResponse"
+  /users/{id}:
+    get:
+      summary: Obtener un usuario por ID
+      operationId: getUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Usuario encontrado"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "404":
+          description: "Usuario no encontrado"
+    patch:
+      summary: Actualizar contraseña de un usuario.
+      operationId: updatePassword
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordUpdateRequest'
+      responses:
+        "200":
+          description: "Contraseña actualizada con éxito"
+        "400":
+          description: "Error al actualizar la contraseña"
+        "404":
+          description: "Usuario no encontrado"
+    put:
+      summary: Actualizar información de un usuario.
+      operationId: updateUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/UserUpdateRequest"
+      responses:
+        "200":
+          description: "Usuario actualizado con éxito"
+        "400":
+          description: "Error en los datos enviados"
+        "404":
+          description: "Usuario no encontrado"
+    delete:
+      summary: Desactivar (eliminar lógicamente) un usuario.
+      operationId: deleteUser
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Usuario desactivado correctamente."
+        "404":
+          description: "Usuario no encontrado."
+        "403":
+          description: "No tienes permisos para desactivar usuarios."
+  /reports:
+    post:
+      summary: Crear un nuevo reporte.
+      operationId: createReport
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/ReportRequest"
+      responses:
+        "201":
+          description: "Reporte creado con éxito"
+        "400":
+          description: "Datos de entrada inválidos"
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para crear reportes"
+        "500":
+          description: "Error en el servidor"
+    get:
+      description: Obtener todos los reportes.
+      operationId: getReports
+      responses:
+        "200":
+          description: "Lista de reportes obtenida correctamente"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReportResponse"
+        "401":
+          description: "No autenticado"
+        "500":
+          description: "Error en el servidor"
+  /reports/{id}:
+    get:
+      summary: Obtener un reporte por ID.
+      operationId: getReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Reporte obtenido correctamente"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReportResponse"
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para ver este reporte"
+        "404":
+          description: "Reporte no encontrado"
+        "500":
+          description: "Error en el servidor"
+    put:
+      summary: Actualizar un reporte.
+      operationId: updateReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/ReportRequest"
+      responses:
+        "200":
+          description: "Reporte actualizado correctamente"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReportResponse"
+        "400":
+          description: "Datos de entrada inválidos"
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para actualizar este reporte"
+        "404":
+          description: "Reporte no encontrado"
+        "500":
+          description: "Error en el servidor"
+    delete:
+      summary: Eliminar un reporte.
+      operationId: deleteReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Reporte eliminado correctamente"
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para eliminar este reporte"
+        "404":
+          description: "Reporte no encontrado"
+        "500":
+          description: "Error en el servidor"
+  /reports/user/{userId}:
+    get:
+      summary: Obtener todos los reportes de un usuario.
+      operationId: getUserReports
+  /reports/{id}/comments:
+    get:
+      summary: Obtener los comentarios de un reporte.
+      operationId: getCommentsReport
+    post:
+      summary: Agregar un comentario a un reporte.
+      operationId: addCommentReport
+  /reports/{id}/status-history:
+    post:
+      summary: Registrar un cambio de estado del reporte.
+      operationId: registerReportStatus
+    get:
+      summary: Obtener el historial de estados de un reporte.
+      operationId: getHistoryStatusReport
+  /comments/{id}:
+    delete:
+      summary: Eliminar un comentario.
+      operationId: deleteComment
+  /categories:
+    post:
+      summary: Crear una nueva categoría.
+      operationId: createCategory
+    get:
+      summary: Obtener todas las categorías.
+      operationId: getCategories
+  /categories/{id}:
+    get:
+      summary: Obtener una categoría por ID.
+      operationId: getCategory
+    put:
+      summary: Actualizar una categoría.
+      operationId: updateCategory
+    delete:
+      summary: Eliminar una categoría.
+      operationId: deleteCategory
+  /notifications:
+    post:
+      summary: Crear una notificación.
+      operationId: createNotification
+  /notifications/user/{userId}:
+    get:
+      summary: Obtener todas las notificaciones de un usuario.
+      operationId: getUserNotifications
+  /notifications/{id}/read:
+    put:
+      summary: Marcar una notificación como leída.
+      operationId: markNotificationRead
+components:
+  schemas:
+    UserResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        fullName:
+          type: string
+        city:
+          type: string
+        phoneNumber:
+          type: string
+        address:
+          type: string
+        email:
+          type: string
+          format: email
+        role:
+          type: string
+          enum: [ CLIENT,ADMIN ]
+        isActive:
+          type: boolean
+    RegisterRequest:
+      type: object
+      required: ["fullName","city","phone","address","email","password"]
+      properties:
+        fullName:
+          type: string
+        city:
+          type: string
+        phone:
+          type: string
+        address:
+          type: string
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    LoginRequest:
+      type: object
+      required: ["email","password"]
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    PasswordUpdateRequest:
+      type: object
+      required: ["currentPassword","newPassword"]
+      properties:
+        currentPassword:
+          type: string
+          format: password
+        newPassword:
+          type: string
+          format: password
+    UserUpdateRequest:
+      type: object
+      required: []
+      properties:
+        fullName:
+          type: string
+        city:
+          type: string
+        phone:
+          type: string
+        email:
+          type: string
+          format: email
+        address:
+          type: string
+    ReportResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        location:
+          $ref: "#/components/schemas/Location"
+    ReportRequest:
+      type: object
+      required : ["title","category","description","location","images"]
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        category:
+          type: array
+          items:
+            type: string
+            example: ["seguridad", "emergencia médica","infraestructura", "mascotas", "comunidad"]
+        location:
+          $ref: "#/components/schemas/Location"
+        images:
+          type: array
+          items:
+            type: string
+            format: uri
+          example: ["https://ejemplo.com/imagen1.jpg","https://ejemplo.com/imagen2.jpg"]
+    Location:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: ["Point"]
+          example: "Point"
+        coordinates:
+          type: array
+          items:
+            type: number
+          minItems: 2
+          maxItems: 2
+          example: [-74.006, 40.7128]  # [longitud, latitud]
