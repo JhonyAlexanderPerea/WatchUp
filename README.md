@@ -36,6 +36,13 @@
         <li>MongoDB</li>
         <li>Gradle</li>
     </ul>
-    
 <h3>Backend (Spring Boot)</h3>
     <pre><code># Clonar el repositorio
+    <li>git clone https://github.com/tu-usuario/watchup.git cd watchup/backend</li></code></pre>
+<h3>Construir y ejecutar la aplicación</h3>
+<pre> <code> <li>./gradlew bootRun</li></code></pre>
+ <h2>📡 API REST</h2>
+    <p>La documentación de la API está disponible en OpenAPI/Swagger en:</p>
+    <pre><code>http://localhost:8080/swagger-ui.html</code></pre>
+    
+
