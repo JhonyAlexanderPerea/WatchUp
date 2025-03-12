@@ -1,3 +1,12 @@
+<div><h1>🚨 WatchUp</h1>
+<p>
+    WatchUp es una plataforma digital diseñada para mejorar la seguridad y el bienestar comunitario. Permite a los ciudadanos reportar incidentes en tiempo real, facilitando la comunicación y colaboración entre la comunidad y las autoridades locales.<br>      <br>
+    Los usuarios pueden registrar reportes en diversas categorías como seguridad, emergencias médicas, infraestructura, mascotas y comunidad, proporcionando información detallada, ubicación georreferenciada y material visual para una mejor gestión de los      incidentes.<br><br>
+    El sistema también cuenta con notificaciones en tiempo real, comentarios en reportes, priorización de incidentes y un panel de administración para moderadores, quienes validan la información y generan informes sobre los eventos reportados.
+</p>
+</div>
+
+<div>
 <h2>📌 Tecnologías Utilizadas</h2>
     <ul>
         <li><strong>Backend:</strong> Spring Boot</li>
@@ -27,7 +36,9 @@
         <li>Rechazo de reportes con motivo y tiempo de corrección.</li>
         <li>Generación de informes en PDF.</li>
     </ul>
-    
+</div>  
+
+<div>
 <h2>⚙️ Instalación y Ejecución</h2>
     <h3>Requisitos Previos</h3>
     <ul>
@@ -36,6 +47,8 @@
         <li>MongoDB</li>
         <li>Gradle</li>
     </ul>
+</div>
+<div>
 <h3>Backend (Spring Boot)</h3>
     <pre><code># Clonar el repositorio
     <li>git clone https://github.com/tu-usuario/watchup.git cd watchup/backend</li></code></pre>
@@ -44,5 +57,5 @@
  <h2>📡 API REST</h2>
     <p>La documentación de la API está disponible en OpenAPI/Swagger en:</p>
     <pre><code>http://localhost:8080/swagger-ui.html</code></pre>
-    
+</div>
 
