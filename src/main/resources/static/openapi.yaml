@@ -62,11 +62,21 @@ paths:
     get:
       summary: Obtener todos los usuarios
       operationId: getUsers
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Paging'
+      parameters:
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: Lista de usuarios obtenida correctamente
@@ -195,11 +205,21 @@ paths:
     get:
       description: Obtener todos los reportes.
       operationId: getReports
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Paging'
+      parameters:
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: Lista de reportes obtenida correctamente
@@ -339,11 +359,20 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Paging'
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: Lista de reportes obtenida correctamente
@@ -369,12 +398,20 @@ paths:
           required: true
           schema:
             type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              #lo mejor seria por desplazamiento (creo, tal vez hay otra mejor)
-              $ref: '#/components/schemas/Paging'
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: Lista de comentarios obtenida correctamente del reporte
@@ -489,11 +526,22 @@ paths:
     get:
       summary: Obtener todas las categorías.
       operationId: getCategories
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Paging'
+      description: Parametros para obtener la paginacion de las categorias, si son muchas
+      parameters:
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: Lista de categorias obtenida correctamente
@@ -763,23 +811,6 @@ components:
             $ref: '#/components/schemas/ReportResponse'
         paginated:
           type: '#/components/schemas/PaginatedContent'
-    Paging:
-      type: object
-      properties:
-        page:
-          in: query
-          description: Número de página (empezando desde 0)
-          required: false
-          schema:
-            type: integer
-            default: 0
-        size:
-          in: query
-          description: Cantidad de elementos por página
-          required: false
-          schema:
-            type: integer
-            default: 10
     ReportRequest:
       type: object
       required : ["title","category","description","location","images"]
