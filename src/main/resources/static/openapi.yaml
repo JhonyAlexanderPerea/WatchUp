@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: WhatchUp
-  description:  WhatchUp (API para la gestión de reportes de seguridad ciudadana y bienestar comunitario.)
+  description:  WhatchUp (API para la gestión de reportes de seguridad ciudadana y bienestar comunitario.
   version: 1.0.0
 servers:
   - url: 'https//localhost:8080/WhatchUpAPI/v1'
@@ -22,8 +22,16 @@ paths:
       responses:
         "201":
           description: "Usuario registrado con éxito"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
         "400":
           description: "Error en los datos enviados"
+        "409":
+          description: "Email ya registrado"
+        "500":
+          description: "Error en el servidor"
   /auth/login:
     post:
       summary: Iniciar sesión (Autenticar un usuario).
@@ -48,19 +56,42 @@ paths:
                     type: string
         "401":
           description: "Credenciales inválidas"
+        "500":
+          description: "Error en el servidor"
   /users:
     get:
-      summary: Obtener todos los usuarios.
+      summary: Obtener todos los usuarios
       operationId: getUsers
+      parameters:
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
       responses:
-        "200":
-          description: "Lista de usuarios"
+        '200':
+          description: Lista de usuarios obtenida correctamente
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/UserResponse"
+                  $ref: '#/components/schemas/PaginatedUserResponse'
+        '401':
+          description: "No autorizado"
+        '403':
+          description: "No hay permisos para esta accion"
+        '500':
+          description: "Error en el servidor"
   /users/{id}:
     get:
       summary: Obtener un usuario por ID
@@ -138,10 +169,10 @@ paths:
       responses:
         "200":
           description: "Usuario desactivado correctamente."
-        "404":
-          description: "Usuario no encontrado."
         "403":
           description: "No tienes permisos para desactivar usuarios."
+        "404":
+          description: "Usuario no encontrado."
   /reports:
     post:
       summary: Crear un nuevo reporte.
@@ -157,6 +188,12 @@ paths:
       responses:
         "201":
           description: "Reporte creado con éxito"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ReportResponse'
         "400":
           description: "Datos de entrada inválidos"
         "401":
@@ -168,15 +205,30 @@ paths:
     get:
       description: Obtener todos los reportes.
       operationId: getReports
+      parameters:
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
       responses:
-        "200":
-          description: "Lista de reportes obtenida correctamente"
+        '200':
+          description: Lista de reportes obtenida correctamente
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: "#/components/schemas/ReportResponse"
+                  $ref: '#/components/schemas/PaginatedReportResponse'
         "401":
           description: "No autenticado"
         "500":
@@ -204,6 +256,39 @@ paths:
           description: "No autenticado"
         "403":
           description: "No autorizado para ver este reporte"
+        "404":
+          description: "Reporte no encontrado"
+        "500":
+          description: "Error en el servidor"
+    patch:
+      summary: Cambiar estado de un reporte.
+      operationId: changeReportStatus
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ReportChangeStatus'
+      responses:
+        "200":
+          description: "Estado del Reporte modificado correctamente"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/ReportResponse"
+        "400":
+          description: "Datos de entrada inválidos"
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para actualizar este reporte"
         "404":
           description: "Reporte no encontrado"
         "500":
@@ -264,57 +349,366 @@ paths:
           description: "Reporte no encontrado"
         "500":
           description: "Error en el servidor"
-  /reports/user/{userId}:
+  /reports/users/{userId}:
     get:
       summary: Obtener todos los reportes de un usuario.
       operationId: getUserReports
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Lista de reportes obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaginatedReportResponse'
+        "401":
+          description: "No autenticado"
+        "404":
+          description: "Usuario no encontrado"
+        "500":
+          description: "Error en el servidor"
   /reports/{id}/comments:
     get:
       summary: Obtener los comentarios de un reporte.
       operationId: getCommentsReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Lista de comentarios obtenida correctamente del reporte
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaginatedCommentResponse'
+        "401":
+          description: "No autenticado"
+        "404":
+          description: "Usuario no encontrado"
+        "500":
+          description: "Error en el servidor"
     post:
       summary: Agregar un comentario a un reporte.
       operationId: addCommentReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentRequest'
+      responses:
+        "201":
+          description: Comentario creado con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CommentResponse'
+        "404":
+          description: "Reporte no encontrado"
+        "500":
+          description: "Error en el servidor"
   /reports/{id}/status-history:
-    post:
-      summary: Registrar un cambio de estado del reporte.
-      operationId: registerReportStatus
     get:
       summary: Obtener el historial de estados de un reporte.
       operationId: getHistoryStatusReport
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de comentarios obtenida correctamente del reporte
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StatusHistoryReport'
+        '404':
+          description: "Reporte no encontrado"
+        '500':
+          description: "Error en el servidor"
+
   /comments/{id}:
     delete:
       summary: Eliminar un comentario.
       operationId: deleteComment
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Reporte eliminado correctamente"
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para eliminar este comentario"
+        "404":
+          description: "Comentario no encontrado"
+        "500":
+          description: "Error en el servidor"
   /categories:
     post:
       summary: Crear una nueva categoría.
       operationId: createCategory
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        "201":
+          description: "Categoria creada con éxito"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryResponse'
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para crear reportes"
+        "500":
+          description: "Error en el servidor"
     get:
       summary: Obtener todas las categorías.
       operationId: getCategories
+      description: Parametros para obtener la paginacion de las categorias, si son muchas
+      parameters:
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Lista de categorias obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaginatedCategoriesResponse'
+        '401':
+          description: "No autorizado"
+        '403':
+          description: "No hay permisos para esta accion"
+        '500':
+          description: "Error en el servidor"
   /categories/{id}:
     get:
       summary: Obtener una categoría por ID.
       operationId: getCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Categoria obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryResponse'
+        '401':
+          description: "No autorizado"
+        '403':
+          description: "No hay permisos para esta accion"
+        '404':
+          description: "Categoria no encontrada"
+        '500':
+          description: "Error en el servidor"
     put:
       summary: Actualizar una categoría.
       operationId: updateCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+      responses:
+        "200":
+          description: "Categoria modificada con éxito"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CategoryResponse'
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para esta accion"
+        '404':
+          description: "Categoria no encontrada"
+        "500":
+          description: "Error en el servidor"
     delete:
       summary: Eliminar una categoría.
       operationId: deleteCategory
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: "Categoria eliminado correctamente"
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para esta accion"
+        "404":
+          description: "Categoria no encontrada"
+        "500":
+          description: "Error en el servidor"
+
+  #no se si vaya asi
   /notifications:
     post:
       summary: Crear una notificación.
       operationId: createNotification
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationRequest'
+      responses:
+        "201":
+          description: "notifacion hecha con éxito a usuarios cercanos"
+        "400":
+          description: "Error en los datos enviados"
+        "500":
+          description: "Error en el servidor"
+
   /notifications/user/{userId}:
     get:
       summary: Obtener todas las notificaciones de un usuario.
       operationId: getUserNotifications
-  /notifications/{id}/read:
-    put:
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Lista de notificaciones obtenida correctamente
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaginatedNotificationResponse'
+        '401':
+          description: "No autorizado"
+        '403':
+          description: "No hay permisos para esta accion"
+        '404':
+          description: "Usuario no encontrado"
+        '500':
+          description: "Error en el servidor"
+  /notifications/user/{userId}/{id}:
+    patch:
       summary: Marcar una notificación como leída.
       operationId: markNotificationRead
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          required: true
+          schema:
+           type: string
+      responses:
+        '200':
+          description: "Notificación marcada como leida"
+        '401':
+          description: "No autorizado"
+        '403':
+          description: "No hay permisos para esta accion"
+        '404':
+          description: "Notificacion no encontrada"
+        '500':
+          description: "Error en el servidor"
+
+
 components:
   schemas:
     UserResponse:
@@ -366,6 +760,15 @@ components:
         password:
           type: string
           format: password
+    PaginatedUserResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserResponse'
+        paginated:
+          type: '#/components/schemas/PaginatedContent'
     PasswordUpdateRequest:
       type: object
       required: ["currentPassword","newPassword"]
@@ -404,6 +807,15 @@ components:
           type: string
         location:
           $ref: "#/components/schemas/Location"
+    PaginatedReportResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/ReportResponse'
+        paginated:
+          type: '#/components/schemas/PaginatedContent'
     ReportRequest:
       type: object
       required : ["title","category","description","location","images"]
@@ -425,6 +837,48 @@ components:
             type: string
             format: uri
           example: ["https://ejemplo.com/imagen1.jpg","https://ejemplo.com/imagen2.jpg"]
+    ReportChangeStatus:
+      type: object
+      properties:
+        newStatus:
+          type: string
+    CommentResponse:
+      type: object
+      properties:
+        userName:
+          type: String
+        userId:
+          type: String
+        comment:
+          type: String
+        date:
+          type: date-time
+          example: "2000-01-01|10:10:23"
+    CommentRequest:
+      type: object
+      properties:
+        comment:
+          type: string
+    PaginatedCommentResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CommentResponse'
+        paginated:
+          type: '#/components/schemas/PaginatedContent'
+    StatusHistoryReport:
+      type: object
+      properties:
+        id:
+          type: string
+        statusHistory:
+          type: array
+          items:
+            type: string
+            format: uri
+          example: "https://ejemplo.com/statusHistory{id}.txt"
     Location:
       type: object
       properties:
@@ -439,3 +893,64 @@ components:
           minItems: 2
           maxItems: 2
           example: [-74.006, 40.7128]  # [longitud, latitud]
+    CategoryRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+    CategoryResponse:
+      type: object
+      properties:
+        name:
+          type: string
+        description:
+          type: string
+        id:
+          type: string
+    PaginatedCategoriesResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CategoryResponse'
+        paginated:
+          type: '#/components/schemas/PaginatedContent'
+    PaginatedContent:
+      type: object
+      properties:
+        totalPages:
+          type: integer
+          description: Número total de páginas
+        totalElements:
+          type: integer
+          description: Número total de elementos
+        currentPage:
+          type: integer
+          description: Página actual
+        pageSize:
+          type: integer
+          description: Tamaño de la página
+    NotificationRequest:
+      type: object
+      properties:
+        reportId:
+          type: string
+    NotificationResponse:
+      type: object
+      properties:
+        report:
+          type: '#/components/schemas/ReportResponse'
+        read:
+          type: boolean
+    PaginatedNotificationResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/NotificationResponse'
+        paginated:
+          type: '#/components/schemas/PaginatedContent'
