@@ -85,7 +85,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PaginatedUserResponse'
+                  $ref: "#/components/schemas/PaginatedUserResponse"
         '401':
           description: "No autorizado"
         '403':
@@ -193,7 +193,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/ReportResponse'
+                  $ref: "#/components/schemas/ReportResponse"
         "400":
           description: "Datos de entrada inválidos"
         "401":
@@ -228,7 +228,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/PaginatedReportResponse'
+                  $ref: "#/components/schemas/PaginatedReportResponse"
         "401":
           description: "No autenticado"
         "500":
