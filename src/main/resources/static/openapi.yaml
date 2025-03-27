@@ -7,31 +7,6 @@ servers:
   - url: 'https//localhost:8080/WhatchUpAPI/v1'
     description: Servidor de la API demo
 paths:
-  /auth/register:
-    post:
-      summary: Registrar un nuevo usuario.
-      operationId: registerUser
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/RegisterRequest"
-      responses:
-        "201":
-          description: "Usuario registrado con éxito"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-        "400":
-          description: "Error en los datos enviados"
-        "409":
-          description: "Email ya registrado"
-        "500":
-          description: "Error en el servidor"
   /auth/login:
     post:
       summary: Iniciar sesión (Autenticar un usuario).
@@ -91,6 +66,30 @@ paths:
         '403':
           description: "No hay permisos para esta accion"
         '500':
+          description: "Error en el servidor"
+    post:
+      summary: Registrar un nuevo usuario.
+      operationId: registerUser
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "201":
+          description: "Usuario registrado con éxito"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: "Error en los datos enviados"
+        "409":
+          description: "Email ya registrado"
+        "500":
           description: "Error en el servidor"
   /users/{id}:
     get:
@@ -203,9 +202,15 @@ paths:
         "500":
           description: "Error en el servidor"
     get:
-      description: Obtener todos los reportes.
+      summary: Obtener todos los reportes con paginacion y opcion de usuario.
       operationId: getReports
       parameters:
+        - name: userId
+          in: query
+          description: ID del usuario para mostrar sus reportes
+          required: false
+          schema:
+            type: string
         - name: page
           in: query
           description: Número de página (empezando desde 0)
@@ -231,6 +236,8 @@ paths:
                   $ref: '#/components/schemas/PaginatedReportResponse'
         "401":
           description: "No autenticado"
+        "403":
+          description: "No autorizado para ver estos reportes"
         "500":
           description: "Error en el servidor"
   /reports/{id}:
@@ -349,52 +356,14 @@ paths:
           description: "Reporte no encontrado"
         "500":
           description: "Error en el servidor"
-  /reports/users/{userId}:
-    get:
-      summary: Obtener todos los reportes de un usuario.
-      operationId: getUserReports
-      parameters:
-        - name: userId
-          in: path
-          required: true
-          schema:
-            type: string
-        - name: page
-          in: query
-          description: Número de página (empezando desde 0)
-          required: false
-          schema:
-            type: integer
-            default: 0
-        - name: size
-          in: query
-          description: Cantidad de elementos por página
-          required: false
-          schema:
-            type: integer
-            default: 10
-      responses:
-        '200':
-          description: Lista de reportes obtenida correctamente
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/PaginatedReportResponse'
-        "401":
-          description: "No autenticado"
-        "404":
-          description: "Usuario no encontrado"
-        "500":
-          description: "Error en el servidor"
-  /reports/{id}/comments:
+
+  /comments:
     get:
       summary: Obtener los comentarios de un reporte.
       operationId: getCommentsReport
       parameters:
-        - name: id
-          in: path
+        - name: idReporte
+          in: query
           required: true
           schema:
             type: string
@@ -431,7 +400,7 @@ paths:
       summary: Agregar un comentario a un reporte.
       operationId: addCommentReport
       parameters:
-        - name: id
+        - name: idReporte
           in: path
           required: true
           schema:
@@ -454,14 +423,14 @@ paths:
           description: "Reporte no encontrado"
         "500":
           description: "Error en el servidor"
-  /reports/{id}/status-history:
+  /status-history:
     get:
       summary: Obtener el historial de estados de un reporte.
       operationId: getHistoryStatusReport
       parameters:
         - name: id
-          in: path
-          required: true
+          in: query
+          required: false
           schema:
             type: string
       responses:
@@ -490,7 +459,7 @@ paths:
             type: string
       responses:
         "200":
-          description: "Reporte eliminado correctamente"
+          description: "Comentario eliminado correctamente"
         "401":
           description: "No autenticado"
         "403":
@@ -642,6 +611,7 @@ paths:
       summary: Crear una notificación.
       operationId: createNotification
       requestBody:
+        required: true
         content:
           application/json:
             schema:
@@ -653,14 +623,12 @@ paths:
           description: "Error en los datos enviados"
         "500":
           description: "Error en el servidor"
-
-  /notifications/user/{userId}:
     get:
       summary: Obtener todas las notificaciones de un usuario.
       operationId: getUserNotifications
       parameters:
         - name: userId
-          in: path
+          in: query
           required: true
           schema:
             type: string
@@ -681,7 +649,7 @@ paths:
           description: "Usuario no encontrado"
         '500':
           description: "Error en el servidor"
-  /notifications/user/{userId}/{id}:
+  /notifications/{id}:
     patch:
       summary: Marcar una notificación como leída.
       operationId: markNotificationRead
@@ -707,7 +675,6 @@ paths:
           description: "Notificacion no encontrada"
         '500':
           description: "Error en el servidor"
-
 
 components:
   schemas:
