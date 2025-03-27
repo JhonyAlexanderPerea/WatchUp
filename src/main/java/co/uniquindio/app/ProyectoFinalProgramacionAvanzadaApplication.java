@@ -1,4 +1,4 @@
-package co.uniquindio.proyectofinalprogramacionavanzada;
+package co.uniquindio.app;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
