@@ -356,6 +356,71 @@ paths:
           description: "Reporte no encontrado"
         "500":
           description: "Error en el servidor"
+  /code:
+    get:
+      summary: Obtener todos los codigos con paginacion y opcion de usuario.
+      operationId: getCode
+      parameters:
+        - name: userId
+          in: query
+          description: ID del usuario para mostrar su codigo de verificacion
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
+      responses:
+        '200':
+          description: Lista de codigos obtenida correctamente
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/PaginatedCodeResponse"
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para ver los codigos"
+        "500":
+          description: "Error en el servidor"
+    post:
+      summary: Crear un nuevo codigo.
+      operationId: createCode
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: "#/components/schemas/CodeRequest"
+      responses:
+        "201":
+          description: "Codigo creado con éxito"
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: "#/components/schemas/CodeResponse"
+        "400":
+          description: "Datos de entrada inválidos"
+        "401":
+          description: "No autenticado"
+        "403":
+          description: "No autorizado para crear codigos"
+        "500":
+          description: "Error en el servidor"
 
   /comments:
     get:
@@ -573,7 +638,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: '#/components/schemas/CategoryResponse'
         "401":
@@ -605,7 +669,6 @@ paths:
         "500":
           description: "Error en el servidor"
 
-  #no se si vaya asi
   /notifications:
     post:
       summary: Crear una notificación.
@@ -919,5 +982,34 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/NotificationResponse'
+        paginated:
+          type: '#/components/schemas/PaginatedContent'
+
+    CodeRequest:
+      type: object
+      properties:
+        id:
+          type: string
+        destinyGmail:
+          type: string
+          format: email
+        ownerName:
+          type: string
+
+    CodeResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        destinyGmail:
+          type: string
+          format: email
+    PaginatedCodeResponse:
+      type: object
+      properties:
+        content:
+          type: array
+          items:
+            $ref: '#/components/schemas/CodeResponse'
         paginated:
           type: '#/components/schemas/PaginatedContent'
