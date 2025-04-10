@@ -759,7 +759,7 @@ components:
           format: email
         role:
           type: string
-          enum: [ CLIENT,ADMIN ]
+          enum: [ USER,ADMIN ]
         isActive:
           type: boolean
     RegisterRequest:
