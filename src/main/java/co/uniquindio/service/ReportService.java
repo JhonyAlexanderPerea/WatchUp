@@ -1,4 +1,4 @@
 package co.uniquindio.service;
 
-public class ReportService {
+public interface ReportService {
 }
