@@ -25,7 +25,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/BasicResponse"
+                $ref: "#/components/schemas/BasicUserResponse"
         "400":
           description: Error en los datos enviados
         "409":
@@ -407,7 +407,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ReportChangeStatus'
+              $ref: '#/components/schemas/ReportChangeStatusRequest'
       responses:
         "200":
           description: Estado del Reporte modificado correctamente
@@ -625,7 +625,7 @@ paths:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/StatusHistoryItem'
+                  $ref: '#/components/schemas/StatusHistoryItemResponse'
         '404':
           description: Reporte no encontrado
         '500':
@@ -910,7 +910,7 @@ components:
         default: 10
 
   schemas:
-    BasicResponse:
+    BasicUserResponse:
       type: object
       properties:
         message:
@@ -968,6 +968,7 @@ components:
           maxLength: 100
         password:
           type: string
+          pattern: "^(?=.*\\d)(?=.*[a-z])(?=.*[A-Z]).*$"
           format: password
           minLength: 8
           maxLength: 50
@@ -991,7 +992,7 @@ components:
           items:
             $ref: '#/components/schemas/UserResponse'
         pageInfo:
-          $ref: '#/components/schemas/PageInfo'
+          $ref: '#/components/schemas/PageInfoResponse'
 
     PasswordUpdateRequest:
       type: object
@@ -1051,7 +1052,7 @@ components:
           type: string
           format: date-time
         createdBy:
-          $ref: "#/components/schemas/BasicUserInfo"
+          $ref: "#/components/schemas/BasicUserInfoResponse"
 
     ReportDetailResponse:
       allOf:
@@ -1068,7 +1069,7 @@ components:
             statusHistory:
               type: array
               items:
-                $ref: "#/components/schemas/StatusHistoryItem"
+                $ref: "#/components/schemas/StatusHistoryItemResponse"
 
     PaginatedReportResponse:
       type: object
@@ -1078,11 +1079,16 @@ components:
           items:
             $ref: '#/components/schemas/ReportResponse'
         pageInfo:
-          $ref: '#/components/schemas/PageInfo'
+          $ref: '#/components/schemas/PageInfoResponse'
 
     ReportRequest:
       type: object
-      required: ["title","categories","description","latitude","longitude"]
+      required:
+        - title
+        - description
+        - categories
+        - latitude
+        - longitude
       properties:
         title:
           type: string
@@ -1103,6 +1109,11 @@ components:
         longitude:
           type: number
           format: double
+        images:
+          type: array
+          items:
+            type: string
+            format: binary
 
     ReportUpdateRequest:
       type: object
@@ -1125,7 +1136,7 @@ components:
           enum: [RESOLVED]
           description: Solo los clientes pueden cambiar a RESOLVED
 
-    ReportChangeStatus:
+    ReportChangeStatusRequest:
       type: object
       required: ["newStatus"]
       properties:
@@ -1148,7 +1159,7 @@ components:
           type: string
           format: date-time
         user:
-          $ref: "#/components/schemas/BasicUserInfo"
+          $ref: "#/components/schemas/BasicUserInfoResponse"
 
     CommentRequest:
       type: object
@@ -1167,16 +1178,16 @@ components:
           items:
             $ref: '#/components/schemas/CommentResponse'
         pageInfo:
-          $ref: '#/components/schemas/PageInfo'
+          $ref: '#/components/schemas/PageInfoResponse'
 
-    StatusHistoryItem:
+    StatusHistoryItemResponse:
       type: object
       properties:
         status:
           type: string
           enum: [PENDING, VERIFIED, REJECTED, RESOLVED]
         changedBy:
-          $ref: "#/components/schemas/BasicUserInfo"
+          $ref: "#/components/schemas/BasicUserInfoResponse"
         changedAt:
           type: string
           format: date-time
@@ -1236,9 +1247,9 @@ components:
           items:
             $ref: '#/components/schemas/CategoryResponse'
         pageInfo:
-          $ref: '#/components/schemas/PageInfo'
+          $ref: '#/components/schemas/PageInfoResponse'
 
-    PageInfo:
+    PageInfoResponse:
       type: object
       properties:
         totalPages:
@@ -1257,7 +1268,7 @@ components:
           type: boolean
           description: Hay más páginas después
 
-    BasicUserInfo:
+    BasicUserInfoResponse:
       type: object
       properties:
         id:
@@ -1273,7 +1284,7 @@ components:
         id:
           type: string
         report:
-          $ref: "#/components/schemas/BasicReportInfo"
+          $ref: "#/components/schemas/BasicReportInfoResponse"
         type:
           type: string
           enum: [NEW_REPORT, STATUS_CHANGE, NEW_COMMENT]
@@ -1293,9 +1304,9 @@ components:
           items:
             $ref: '#/components/schemas/NotificationResponse'
         pageInfo:
-          $ref: '#/components/schemas/PageInfo'
+          $ref: '#/components/schemas/PageInfoResponse'
 
-    BasicReportInfo:
+    BasicReportInfoResponse:
       type: object
       properties:
         id:

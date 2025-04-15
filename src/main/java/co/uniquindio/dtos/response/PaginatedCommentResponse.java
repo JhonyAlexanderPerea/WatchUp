@@ -1,4 +1,4 @@
 package co.uniquindio.dtos.response;
 
-public class ReportResponse {
+public class PaginatedCommentResponse {
 }

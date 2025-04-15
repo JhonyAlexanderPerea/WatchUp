@@ -1,4 +1,4 @@
 package co.uniquindio.dtos.response.auth;
 
-public class UserResponse {
+public class ReportResponse {
 }

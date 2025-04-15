@@ -1,4 +1,4 @@
 package co.uniquindio.dtos.request;
 
-public class CoomentRequest {
+public class ReportUpdateRequest {
 }

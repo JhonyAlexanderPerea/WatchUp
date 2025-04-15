@@ -1,35 +1,32 @@
 package co.uniquindio.model;
 
-import co.uniquindio.enums.ReportStatus;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
 import java.time.LocalDateTime;
 
-@Document(collection = "status_history")
+@Document(collection = "password_reset_tokens")
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class StatusHistory {
+public class PasswordResetToken {
 
     @Id
     private String id;
 
+    private String token;
+
     @DBRef
-    private Report report;
+    private User user;
 
-    private ReportStatus status;
+    @Field("expiry_date")
+    private LocalDateTime expiryDate;
 
-    @Field("changed_by")
-    @DBRef
-    private User changedBy;
-
-    @Field("changed_at")
-    private LocalDateTime changedAt;
-
-    @Field("rejection_reason")
-    private String rejectionReason;
+    public boolean isExpired() {
+        return LocalDateTime.now().isAfter(expiryDate);
+    }
 }
