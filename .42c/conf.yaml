@@ -1,0 +1,3 @@
+apis:
+  src/main/resources/static/openapi.yaml:
+    alias: whatchup

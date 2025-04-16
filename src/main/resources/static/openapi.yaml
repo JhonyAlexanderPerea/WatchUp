@@ -981,7 +981,7 @@ components:
           type: string
         city:
           type: string
-        phone:
+        phoneNumber:
           type: string
         address:
           type: string
@@ -1009,7 +1009,7 @@ components:
           items:
             $ref: '#/components/schemas/UserResponse'
         paginated:
-          type: '#/components/schemas/PaginatedContent'
+          $ref: '#/components/schemas/PaginatedContent'
     PasswordUpdateRequest:
       type: object
       required: ["currentPassword","newPassword"]
@@ -1028,7 +1028,7 @@ components:
           type: string
         city:
           type: string
-        phone:
+        phoneNumber:
           type: string
         email:
           type: string
@@ -1056,7 +1056,7 @@ components:
           items:
             $ref: '#/components/schemas/ReportResponse'
         paginated:
-          type: '#/components/schemas/PaginatedContent'
+          $ref: '#/components/schemas/PaginatedContent'
     ReportRequest:
       type: object
       required : ["title","category","description","location","images"]
@@ -1066,10 +1066,9 @@ components:
         description:
           type: string
         category:
-          type: array
-          items:
-            type: string
-            example: ["seguridad", "emergencia médica","infraestructura", "mascotas", "comunidad"]
+          type: string
+          enum: ["SEGURIDAD", "EMERGENCIA_MEDICA", "INFRAESTRUCTURA", "MASCOTAS", "COMUNIDAD"]
+          example: "SEGURIDAD"
         location:
           $ref: "#/components/schemas/Location"
         images:
@@ -1083,15 +1082,16 @@ components:
       properties:
         newStatus:
           type: string
+          enum: ["VERIFICADO","RECHAZADO","RESUELTO"]
     CommentResponse:
       type: object
       properties:
         userName:
-          type: String
+          type: string
         userId:
-          type: String
+          type: string
         comment:
-          type: String
+          type: string
         date:
           type: date-time
           example: "2000-01-01|10:10:23"
@@ -1108,7 +1108,7 @@ components:
           items:
             $ref: '#/components/schemas/CommentResponse'
         paginated:
-          type: '#/components/schemas/PaginatedContent'
+          $ref: '#/components/schemas/PaginatedContent'
     StatusHistoryReport:
       type: object
       properties:
@@ -1119,7 +1119,9 @@ components:
           items:
             type: string
             format: uri
-          example: "https://ejemplo.com/statusHistory{id}.txt"
+          example:
+            - "https://ejemplo.com/statusHistory1.txt"
+            - "https://ejemplo.com/statusHistory2.txt"
     Location:
       type: object
       properties:
@@ -1158,7 +1160,7 @@ components:
           items:
             $ref: '#/components/schemas/CategoryResponse'
         paginated:
-          type: '#/components/schemas/PaginatedContent'
+          $ref: '#/components/schemas/PaginatedContent'
     PaginatedContent:
       type: object
       properties:
@@ -1183,7 +1185,7 @@ components:
       type: object
       properties:
         report:
-          type: '#/components/schemas/ReportResponse'
+          $ref: '#/components/schemas/ReportResponse'
         read:
           type: boolean
     PaginatedNotificationResponse:
@@ -1194,14 +1196,14 @@ components:
           items:
             $ref: '#/components/schemas/NotificationResponse'
         paginated:
-          type: '#/components/schemas/PaginatedContent'
+          $ref: '#/components/schemas/PaginatedContent'
 
     CodeRequest:
       type: object
       properties:
         id:
           type: string
-        destinyGmail:
+        destinyEmail:
           type: string
           format: email
         ownerName:
@@ -1212,7 +1214,7 @@ components:
       properties:
         id:
           type: string
-        destinyGmail:
+        destinyEmail:
           type: string
           format: email
     PaginatedCodeResponse:
@@ -1223,4 +1225,4 @@ components:
           items:
             $ref: '#/components/schemas/CodeResponse'
         paginated:
-          type: '#/components/schemas/PaginatedContent'
+          $ref: '#/components/schemas/PaginatedContent'
