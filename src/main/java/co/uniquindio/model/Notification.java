@@ -19,7 +19,7 @@ public class Notification {
     private String id;
 
     @DBRef
-    private User recipient;
+    private User user;
 
     @DBRef
     private Report report;

@@ -288,27 +288,7 @@ paths:
         content:
           multipart/form-data:
             schema:
-              type: object
-              properties:
-                title:
-                  type: string
-                description:
-                  type: string
-                categories:
-                  type: array
-                  items:
-                    type: string
-                latitude:
-                  type: number
-                  format: double
-                longitude:
-                  type: number
-                  format: double
-                images:
-                  type: array
-                  items:
-                    type: string
-                    format: binary
+              $ref: '#/components/schemas/ReportRequest'
       responses:
         "201":
           description: Reporte creado con éxito
@@ -340,7 +320,7 @@ paths:
           description: Filtrar por categoría
           schema:
             type: string
-        - name: important
+        - name: isImportant
           in: query
           description: Filtrar reportes marcados como importantes
           schema:
@@ -872,7 +852,7 @@ paths:
   /notifications/subscribe:
     get:
       summary: Suscribirse a notificaciones en tiempo real
-      operationId: subscribeToNotifications
+      operationId: sendRealTimeNotification
       security:
         - bearerAuth: []
       responses:

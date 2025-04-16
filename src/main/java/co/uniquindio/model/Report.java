@@ -51,4 +51,7 @@ public class Report {
     @Field("status_history")
     private List<StatusHistory> statusHistory;
 
+    @Field("comments")
+    private List<Comment> comments;
+
 }

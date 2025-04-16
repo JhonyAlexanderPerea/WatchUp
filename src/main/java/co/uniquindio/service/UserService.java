@@ -10,8 +10,8 @@ import co.uniquindio.model.User;
 
 public interface UserService {
     PaginatedUserResponse getUsers(int page, int size);
-    UserResponse getUser(String id);
-    Boolean updatePassword(PasswordUpdateRequest passwordUpdateRequest);
-    UserResponse updateUser(UserUpdateRequest userUpdateRequest);
-    void deactivateUser(User user);
+    UserResponse getUser(String userId);
+    void updatePassword(String userId, PasswordUpdateRequest passwordUpdateRequest);
+    UserResponse updateUser(String userId, UserUpdateRequest userUpdateRequest);
+    void deactivateUser(String userId);
 }

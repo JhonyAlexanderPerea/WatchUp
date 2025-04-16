@@ -1,8 +1,9 @@
 package co.uniquindio.service;
 
-import co.uniquindio.dtos.response.PaginatednotificationResponse;
+import co.uniquindio.dtos.response.PaginatedNotificationResponse;
 
 public interface NotificationService {
-    PaginatednotificationResponse getUserNotifications(int page, int size);
+    PaginatedNotificationResponse getUserNotifications(int page, int size);
     void markNotificationRead (String notificationId);
+    void sendRealTimeNotification(String message);
 }
