@@ -2,7 +2,7 @@ openapi: 3.1.0
 info:
   title: WhatchUp
   description:  WhatchUp (API para la gestión de reportes de seguridad ciudadana y bienestar comunitario.
-  version: 1.0.0
+  version: 2.0.0
 servers:
   - url: 'https//localhost:8080/WhatchUpAPI/v1'
     description: Servidor de la API demo
@@ -38,6 +38,46 @@ paths:
       summary: Obtener todos los usuarios
       operationId: getUsers
       parameters:
+        - name: name
+          in: query
+          description: Filtrar por nombre
+          required: false
+          schema:
+            type: string
+        - name: email
+          in: query
+          description: Filtrar por email
+          required: false
+          schema:
+            type: string
+        - name: registerDate
+          in: query
+          description: Filtrar por fecha de registro
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: age
+          in: query
+          description: Filtrar por edad
+          required: false
+          schema:
+            type: integer
+        - name: status
+          in: query
+          description: Filtrar por estado (active/inactive)
+          required: false
+          schema:
+            type: string
+            enum: [ active, deleted, registered ]
+        - name: order
+          in: query
+          description: Orden ascendente (asc) o descendente (desc)
+          required: false
+          schema:
+            type: string
+            enum: [ asc, desc ]
+            default: asc
         - name: page
           in: query
           description: Número de página (empezando desde 0)
@@ -205,12 +245,45 @@ paths:
       summary: Obtener todos los reportes con paginacion y opcion de usuario.
       operationId: getReports
       parameters:
+        - name: title
+          in: query
+          description: Filtrar por el titulo del reporte
+          required: false
+          schema:
+            type: string
         - name: userId
           in: query
           description: ID del usuario para mostrar sus reportes
           required: false
           schema:
             type: string
+        - name: category
+          in: query
+          description: Filtro por tipo de categoria
+          required: false
+          schema:
+            type: string
+        - name: status
+          in: query
+          description: Filtrar por estado
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Orden ascendente (asc) o descendente (desc)
+          required: false
+          schema:
+            type: string
+            enum: [ asc, desc ]
+            default: asc
+        - name: registerDate
+          in: query
+          description: Filtrar por fecha de creacion del reporte
+          required: false
+          schema:
+            type: string
+            format: date
         - name: page
           in: query
           description: Número de página (empezando desde 0)
@@ -361,6 +434,27 @@ paths:
       summary: Obtener todos los codigos con paginacion y opcion de usuario.
       operationId: getCode
       parameters:
+        - name: status
+          in: query
+          description: Filtrar por estado
+          required: false
+          schema:
+            type: string
+        - name: order
+          in: query
+          description: Orden ascendente (asc) o descendente (desc)
+          required: false
+          schema:
+            type: string
+            enum: [ asc, desc ]
+            default: asc
+        - name: registerDate
+          in: query
+          description: Filtrar por fecha de creacion del reporte
+          required: false
+          schema:
+            type: string
+            format: date
         - name: userId
           in: query
           description: ID del usuario para mostrar su codigo de verificacion
@@ -427,11 +521,37 @@ paths:
       summary: Obtener los comentarios de un reporte.
       operationId: getCommentsReport
       parameters:
+        - name: userId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: registerDate
+          in: query
+          description: Filtrar por fecha de creacion del codigo
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: []
         - name: idReporte
           in: query
           required: true
           schema:
             type: string
+        - name: order
+          in: query
+          description: Orden ascendente (asc) o descendente (desc)
+          required: false
+          schema:
+            type: string
+            enum: [ asc, desc ]
+            default: asc
         - name: page
           in: query
           description: Número de página (empezando desde 0)
@@ -493,11 +613,46 @@ paths:
       summary: Obtener el historial de estados de un reporte.
       operationId: getHistoryStatusReport
       parameters:
-        - name: id
+        - name: reportId
           in: query
           required: false
           schema:
             type: string
+        - name: category
+          in: query
+          description: Filtro por tipo de categoria
+          required: false
+          schema:
+            type: string
+        - name: registerDate
+          in: query
+          description: Filtrar por fecha de creacion del reporte
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: order
+          in: query
+          description: Orden ascendente (asc) o descendente (desc)
+          required: false
+          schema:
+            type: string
+            enum: [ asc, desc ]
+            default: asc
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: Lista de comentarios obtenida correctamente del reporte
@@ -562,6 +717,27 @@ paths:
       operationId: getCategories
       description: Parametros para obtener la paginacion de las categorias, si son muchas
       parameters:
+        - name: order
+          in: query
+          description: Orden ascendente (asc) o descendente (desc)
+          required: false
+          schema:
+            type: string
+            enum: [ asc, desc ]
+            default: asc
+        - name: name
+          in: query
+          description: Filtro por el nombre de categoria
+          required: false
+          schema:
+            type: string
+        - name: registerDate
+          in: query
+          description: Filtrar por fecha de creacion de la categoria
+          required: false
+          schema:
+            type: string
+            format: date
         - name: page
           in: query
           description: Número de página (empezando desde 0)
@@ -690,11 +866,46 @@ paths:
       summary: Obtener todas las notificaciones de un usuario.
       operationId: getUserNotifications
       parameters:
+        - name: registerDate
+          in: query
+          description: Filtrar por fecha de creacion del reporte
+          required: false
+          schema:
+            type: string
+            format: date
+        - name: order
+          in: query
+          description: Orden ascendente (asc) o descendente (desc)
+          required: false
+          schema:
+            type: string
+            enum: [ asc, desc ]
+            default: asc
         - name: userId
           in: query
           required: true
           schema:
             type: string
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [ ]
+        - name: page
+          in: query
+          description: Número de página (empezando desde 0)
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: size
+          in: query
+          description: Cantidad de elementos por página
+          required: false
+          schema:
+            type: integer
+            default: 10
       responses:
         '200':
           description: Lista de notificaciones obtenida correctamente
