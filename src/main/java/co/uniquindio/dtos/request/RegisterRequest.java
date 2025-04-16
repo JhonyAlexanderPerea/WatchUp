@@ -1,6 +1,11 @@
 package co.uniquindio.dtos.request;
 
-import co.uniquindio.enums.Role;
+import lombok.*;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 
 public class RegisterRequest {
     private String fullName;
