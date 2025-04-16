@@ -1,4 +1,8 @@
 package co.uniquindio.repository;
 
-public interface StatusHistoryRespository {
+import co.uniquindio.model.StatusHistory;
+import org.springframework.data.mongodb.repository.MongoRepository;
+
+public interface StatusHistoryRespository extends MongoRepository <StatusHistory, String> {
+
 }
