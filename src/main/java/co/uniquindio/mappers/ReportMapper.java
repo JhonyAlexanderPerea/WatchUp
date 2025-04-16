@@ -1,4 +1,8 @@
 package co.uniquindio.mappers;
 
-public class ReportMapper {
+import org.mapstruct.Mapper;
+import org.mapstruct.MappingConstants;
+
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+public interface ReportMapper {
 }

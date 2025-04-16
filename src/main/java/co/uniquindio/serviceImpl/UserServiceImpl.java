@@ -9,6 +9,9 @@ import co.uniquindio.mappers.UserMapper;
 import co.uniquindio.model.User;
 import co.uniquindio.repository.UserRepository;
 import co.uniquindio.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -29,11 +32,22 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public PaginatedUserResponse getUsers(int page, int size) {
-        List<UserResponse> users = new ArrayList<UserResponse>();
-        for (User user : userRepository.findAll()) {
-            users.add(userMapper.userToUserResponse(user));
-        }
-        return new PaginatedUserResponse(users,pageInfo);
+        Pageable pageable = PageRequest.of(page, size);
+        Page<User> userPage = userRepository.findAll(pageable);
+
+        List<UserResponse> users = userPage.getContent()
+                .stream()
+                .map(userMapper::userToUserResponse)
+                .toList();
+
+        PageInfoResponse pageInfo = new PageInfoResponse();
+        pageInfo.setTotalPages(userPage.getTotalPages());
+        pageInfo.setTotalElements((int) userPage.getTotalElements());
+        pageInfo.setCurrentPage(userPage.getNumber());
+        pageInfo.setPageSize(userPage.getSize());
+        pageInfo.setHasNext(userPage.hasNext());
+
+        return new PaginatedUserResponse(users, pageInfo);
     }
 
     @Override

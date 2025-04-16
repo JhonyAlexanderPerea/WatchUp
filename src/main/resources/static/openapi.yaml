@@ -4,7 +4,7 @@ info:
   description: API para la gestión de reportes de seguridad ciudadana y bienestar comunitario.
   version: 2.0.0
 servers:
-  - url: 'https://localhost:8080/WhatchUpAPI/v1'
+  - url: 'https://localhost:8080'
     description: Servidor de desarrollo
 
 paths:
