@@ -221,7 +221,6 @@ paths:
         content:
           application/json:
             schema:
-              type: array
               items:
                 $ref: "#/components/schemas/ReportRequest"
       responses:
@@ -230,7 +229,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: "#/components/schemas/ReportResponse"
         "400":
@@ -360,7 +358,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: "#/components/schemas/ReportResponse"
         "400":
@@ -387,7 +384,6 @@ paths:
         content:
           application/json:
             schema:
-              type: array
               items:
                 $ref: "#/components/schemas/ReportRequest"
       responses:
