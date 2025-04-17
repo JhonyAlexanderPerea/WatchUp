@@ -134,7 +134,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse getUserById(String id) {
-        User user = userRepository.getUserById(id);
-        return userMapper.userToUserResponse(user);
+        log.debug("Buscando usuario con ID: {}", id);
+
+        return userRepository.findById(id)
+                .map
+                ( user -> {
+                            log.debug("Usuario encontrado con ID: {}", id);
+                            return userMapper.userToUserResponse(user);
+                        }
+                )
+                .orElseThrow(() -> {
+                    log.error("Usuario no encontrado con ID: {}", id);
+                    return new ApiExceptions.NotFoundException(
+                        "Usuario no encontrado"
+                    );
+                });
     }
 }

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends MongoRepository<User, String> {
@@ -35,4 +36,5 @@ public interface UserRepository extends MongoRepository<User, String> {
     boolean existsByEmail(String email);
 
     User getUserById(String id);
+
 }
