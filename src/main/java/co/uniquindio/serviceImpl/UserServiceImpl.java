@@ -131,4 +131,10 @@ public class UserServiceImpl implements UserService {
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
+
+    @Override
+    public UserResponse getUserById(String id) {
+        User user = userRepository.getUserById(id);
+        return userMapper.userToUserResponse(user);
+    }
 }

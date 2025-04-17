@@ -21,5 +21,6 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
+    UserResponse getUserById(String id);
 
 }
