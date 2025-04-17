@@ -4,7 +4,7 @@ info:
   description:  WhatchUp (API para la gestión de reportes de seguridad ciudadana y bienestar comunitario.
   version: 2.0.0
 servers:
-  - url: 'https//localhost:8080/WhatchUpAPI/v1'
+  - url: 'http://localhost:8080'
     description: Servidor de la API demo
 paths:
   /auth/login:
@@ -115,9 +115,7 @@ paths:
         content:
           application/json:
             schema:
-              type: array
-              items:
-                $ref: "#/components/schemas/RegisterRequest"
+              $ref: "#/components/schemas/RegisterRequest"
       responses:
         "201":
           description: "Usuario registrado con éxito"
