@@ -104,15 +104,15 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse registerUser(RegisterRequest request) {
-        log.debug("Iniciando registro de usuario con email: {}", request.getEmail());
+        log.debug("Iniciando registro de usuario con email: {}", request.email());
 
-        if (existsByEmail(request.getEmail())) {
+        if (existsByEmail(request.email())) {
             throw new ApiExceptions.EmailAlreadyExistsException("El email ya está registrado");
         }
 
         try {
             User user = userMapper.registerRequestToUser(request);
-            user.setPassword(passwordEncoder.encode(request.getPassword()));
+            user.setPassword(passwordEncoder.encode(request.password()));
 
             log.debug("Usuario mapeado antes de guardar: {}", user);
 

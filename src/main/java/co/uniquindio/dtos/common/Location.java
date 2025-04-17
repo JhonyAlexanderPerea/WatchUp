@@ -4,12 +4,8 @@ import java.util.List;
 
 import lombok.*;
 
-
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Builder
-public class Location {
-    private String type;             
-    private List<Double> coordinates;
-}
+public record Location (
+    String type,
+    List<Double> coordinates
+) {}
