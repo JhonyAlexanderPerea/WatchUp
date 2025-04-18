@@ -1,3 +1,9 @@
 package co.uniquindio.dtos.request;
 
-public record CommentRequest (String comment){}
+import lombok.*;
+
+public record CommentRequest(
+         String comment
+) {
+
+}

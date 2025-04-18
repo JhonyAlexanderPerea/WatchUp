@@ -1,7 +1,14 @@
 package co.uniquindio.dtos.response;
 
-public record CategoryResponse (
-    String name,
-    String description,
-    String id
-){}
+import lombok.*;
+
+import java.time.LocalDateTime;
+
+public record CategoryResponse(
+        String name,
+        String description,
+        String id,
+        LocalDateTime creationDate
+) {
+
+}

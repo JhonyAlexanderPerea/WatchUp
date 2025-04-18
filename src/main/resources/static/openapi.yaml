@@ -260,7 +260,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/UserUpdateRequest"
+                $ref: "#/components/schemas/UserResponse"
       responses:
         "200":
           description: "Usuario actualizado con éxito"
@@ -297,7 +297,6 @@ paths:
         content:
           application/json:
             schema:
-              type: array
               items:
                 $ref: "#/components/schemas/ReportRequest"
       responses:
@@ -306,7 +305,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: "#/components/schemas/ReportResponse"
         "400":
@@ -436,7 +434,6 @@ paths:
           content:
             application/json:
               schema:
-                type: array
                 items:
                   $ref: "#/components/schemas/ReportResponse"
         "400":
@@ -463,7 +460,6 @@ paths:
         content:
           application/json:
             schema:
-              type: array
               items:
                 $ref: "#/components/schemas/ReportRequest"
       responses:
@@ -592,7 +588,7 @@ paths:
         "500":
           description: "Error en el servidor"
 
-  /comments:
+  /rerports/{id}/comments:
     get:
       summary: Obtener los comentarios de un reporte.
       operationId: getCommentsReport
@@ -661,12 +657,13 @@ paths:
       summary: Agregar un comentario a un reporte.
       operationId: addCommentReport
       parameters:
-        - name: idReporte
+        - name: reportId
           in: path
           required: true
           schema:
             type: string
       requestBody:
+        requeried: true
         content:
           application/json:
             schema:
@@ -684,6 +681,8 @@ paths:
           description: "Reporte no encontrado"
         "500":
           description: "Error en el servidor"
+        security:
+          - BearerAuth: [ ]
   /status-history:
     get:
       summary: Obtener el historial de estados de un reporte.
@@ -743,7 +742,7 @@ paths:
         '500':
           description: "Error en el servidor"
 
-  /comments/{id}:
+  /rerports/{id}/comments/{id}:
     delete:
       summary: Eliminar un comentario.
       operationId: deleteComment
@@ -1163,20 +1162,29 @@ components:
     CommentResponse:
       type: object
       properties:
+        id:
+          type: String
         userName:
           type: string
         userId:
+          type: string
+        reportId:
           type: string
         comment:
           type: string
         date:
           type: date-time
           example: "2000-01-01|10:10:23"
+        status:
+          type: string
+          enum : [ACTIVE, DELETED, REJECTED]
     CommentRequest:
       type: object
       properties:
         comment:
           type: string
+          minLength: 1
+          maxLength: 500
     PaginatedCommentResponse:
       type: object
       properties:
@@ -1229,6 +1237,8 @@ components:
           type: string
         id:
           type: string
+        creationDate:
+          type: date
     PaginatedCategoriesResponse:
       type: object
       properties:
