@@ -29,7 +29,7 @@ public interface UserService {
 
     Optional<UserResponse> getUserById(String id);
 
-    void updatePassword(String id, PasswordUpdateRequest request);
+    Optional<Void> updatePassword(String id, PasswordUpdateRequest request);
 
     Optional <UserResponse> updateUser(String id, UserUpdateRequest request);
 

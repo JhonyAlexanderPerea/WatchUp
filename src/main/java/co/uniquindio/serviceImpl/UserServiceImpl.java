@@ -156,7 +156,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void updatePassword(String id, PasswordUpdateRequest request) {
+    public Optional<Void>updatePassword(String id, PasswordUpdateRequest request) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ApiExceptions.ResourceNotFoundException("Usuario no encontrado con ID: " + id));
 
@@ -172,11 +172,73 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
         log.info("Contraseña actualizada con éxito para el usuario con ID: {}", id);
+
+        return Optional.empty();
     }
 
     @Override
-    public Optional <UserResponse> updateUser(String id, UserUpdateRequest request) {
-        return Optional.empty();
+    public Optional<UserResponse> updateUser(String id, UserUpdateRequest request) {
+        log.debug("Iniciando actualización de usuario con ID: {}", id);
+
+        return userRepository.findById(id)
+                .map(existingUser -> {
+                    try {
+                        // Actualizar nombre completo si no es nulo ni vacío
+                        Optional.ofNullable(request.fullName())
+                                .filter(name -> !name.trim().isEmpty())
+                                .ifPresent(name -> {
+                                    existingUser.setFullName(name);
+                                    log.debug("Nombre actualizado a: {}", name);
+                                });
+
+                        // Actualizar email si no es nulo ni vacío, verificando duplicados
+                        Optional.ofNullable(request.email())
+                                .filter(email -> !email.trim().isEmpty())
+                                .ifPresent(email -> {
+                                    if (!email.equals(existingUser.getEmail()) && existsByEmail(email)) {
+                                        throw new ApiExceptions.EmailAlreadyExistsException("El email ya está registrado");
+                                    }
+                                    existingUser.setEmail(email);
+                                    log.debug("Email actualizado a: {}", email);
+                                });
+
+                        // Actualizar ciudad si no es nula ni vacía
+                        Optional.ofNullable(request.city())
+                                .filter(city -> !city.trim().isEmpty())
+                                .ifPresent(city -> {
+                                    existingUser.setCity(city);
+                                    log.debug("Ciudad actualizada a: {}", city);
+                                });
+
+                        // Actualizar número de teléfono si no es nulo ni vacío
+                        Optional.ofNullable(request.phoneNumber())
+                                .filter(phone -> !phone.trim().isEmpty())
+                                .ifPresent(phone -> {
+                                    existingUser.setPhoneNumber(phone);
+                                    log.debug("Teléfono actualizado a: {}", phone);
+                                });
+
+                        // Actualizar dirección si no es nula ni vacía
+                        Optional.ofNullable(request.address())
+                                .filter(address -> !address.trim().isEmpty())
+                                .ifPresent(address -> {
+                                    existingUser.setAddress(address);
+                                    log.debug("Dirección actualizada a: {}", address);
+                                });
+
+                        User updatedUser = userRepository.save(existingUser);
+                        log.info("Usuario actualizado exitosamente con ID: {}", updatedUser.getId());
+                        return userMapper.userToUserResponse(updatedUser);
+                    } catch (Exception e) {
+                        log.error("Error al actualizar usuario: ", e);
+                        throw new ApiExceptions.InternalServerErrorException("Error al actualizar el usuario: " + e.getMessage());
+                    }
+                })
+                .map(Optional::of)
+                .orElseThrow(() -> {
+                    log.error("Usuario no encontrado con ID: {}", id);
+                    return new ApiExceptions.ResourceNotFoundException("Usuario no encontrado con ID: " + id);
+                });
     }
 
 }

@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
@@ -26,7 +27,7 @@ public class UserController {
     }
 
     @GetMapping
-    public ResponseEntity<PaginatedUserResponse> getUsers(
+    public Optional<PaginatedUserResponse> getUsers(
             @RequestParam(required = false) String fullName,
             @RequestParam(required = false) String email,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate registerDate,
@@ -36,33 +37,30 @@ public class UserController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        PaginatedUserResponse response = userService.getUsers(
+        return userService.getUsers(
                 fullName, email, registerDate, age, status, order, page, size
         );
-        return ResponseEntity.ok(response);
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> registerUser(@Valid @RequestBody RegisterRequest request) {
-        UserResponse response = userService.registerUser(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    public Optional<UserResponse> registerUser(@Valid @RequestBody RegisterRequest request) {
+        return userService.registerUser(request);
+
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<UserResponse> getUser(@PathVariable String id){
-        UserResponse response = userService.getUserById(id);
-        return ResponseEntity.ok(response);
+    public Optional<UserResponse> getUser(@PathVariable String id){
+        return userService.getUserById(id);
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updatePassword(@PathVariable String id, @Valid @RequestBody PasswordUpdateRequest request){
-        userService.updatePassword(id, request);
-        return ResponseEntity.noContent().build();
+    public Optional<Void> updatePassword(@PathVariable String id, @Valid @RequestBody PasswordUpdateRequest request){
+        return userService.updatePassword(id, request);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Void> updateUser (@PathVariable String id, @Valid @RequestBody UserUpdateRequest request) {
-        userService.updateUser(id,request);
+    public Optional<UserResponse> updateUser (@PathVariable String id, @Valid @RequestBody UserUpdateRequest request) {
+        return userService.updateUser(id,request);
     }
 
 }
