@@ -1,9 +1,9 @@
-package co.uniquindio.app;
+package co.uniquindio;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-@SpringBootApplication
+@SpringBootApplication //(scanBasePackages = "co.uniquindio")
 public class ProyectoFinalProgramacionAvanzadaApplication {
 
 	public static void main(String[] args) {
