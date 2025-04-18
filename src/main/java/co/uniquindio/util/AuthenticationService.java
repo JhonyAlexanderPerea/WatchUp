@@ -6,6 +6,7 @@ import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.enums.UserStatus;
 import co.uniquindio.exceptions.ApiExceptions;
 import co.uniquindio.model.User;
+import co.uniquindio.repository.PasswordResetTokenRepository;
 import co.uniquindio.repository.UserRepository;
 import co.uniquindio.mappers.UserMapper;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +27,8 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final UserMapper userMapper;
     private final EmailService emailService;
+    private final PasswordResetTokenServiceImpl passwordResetTokenService;
+    private final PasswordResetTokenRepository resetTokenRepository;
 
     public LoginResponse login(AuthenticationRequest request) {
         User user = userRepository.findByEmail(request.email())
@@ -113,27 +116,26 @@ public class AuthenticationService {
     }
 
     public void sendPasswordResetToken(String email) {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApiExceptions.NotFoundException("Usuario no encontrado"));
+        // Llamamos al servicio para generar y guardar el código UUID
+        String resetCode = passwordResetTokenService.generateAndSavePasswordResetToken(email);
 
-        // Crear un JWT con tiempo de expiración corto (15 minutos)
-        String resetToken = jwtService.generatePasswordResetToken(user.getEmail());
-        
-        // Enviar el token por email
-        emailService.sendPasswordResetEmail(email, resetToken);
+        // Enviar el código de restablecimiento por correo
+        emailService.sendPasswordResetEmail(email, resetCode);
     }
 
-    public void resetPassword(String token, String newPassword) {
-        // Verificar el token y extraer el email
-        String email = jwtService.validatePasswordResetToken(token);
-        
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new ApiExceptions.NotFoundException("Usuario no encontrado"));
+    public void resetPassword(String code, String newPassword) {
+        // Validar el código de restablecimiento y obtener el usuario
+        User user = passwordResetTokenService.validatePasswordResetToken(code);
 
+        // Cambiar la contraseña del usuario
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepository.save(user);
-    }
 
+        // Eliminar el token después de usarlo
+        PasswordResetToken token = resetTokenRepository.findByCode(code)
+                .orElseThrow(() -> new ApiExceptions.InvalidOperationException("Token no encontrado"));
+        passwordResetTokenService.deleteToken(token);
+    }
     private String generateCode() {
         return String.format("%06d", new Random().nextInt(999999));
     }

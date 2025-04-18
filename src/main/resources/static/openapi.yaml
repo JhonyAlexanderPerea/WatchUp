@@ -203,28 +203,6 @@ paths:
           description: "No hay permisos para esta accion"
         '500':
           description: "Error en el servidor"
-    post:
-      summary: Registrar un nuevo usuario.
-      operationId: registerUser
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/RegisterRequest"
-      responses:
-        "201":
-          description: "Usuario registrado con éxito"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/UserResponse"
-        "400":
-          description: "Error en los datos enviados"
-        "409":
-          description: "Email ya registrado"
-        "500":
-          description: "Error en el servidor"
   /users/{id}:
     get:
       summary: Obtener un usuario por ID

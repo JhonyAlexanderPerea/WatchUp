@@ -1,18 +1,14 @@
 package co.uniquindio.util;
 
 import co.uniquindio.model.User;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.function.Function;
 
 @Service
@@ -26,6 +22,7 @@ public class JwtService {
 
     private static final long PASSWORD_RESET_EXPIRATION = 15 * 60 * 1000; // 15 minutos
 
+    // ✅ Generar token JWT normal para login
     public String generateToken(User user) {
         return generateToken(new HashMap<>(), user);
     }
@@ -34,46 +31,28 @@ public class JwtService {
         return buildToken(extraClaims, user, jwtExpiration);
     }
 
-    public String generatePasswordResetToken(String email) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("purpose", "password_reset");
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(email)
-                .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + PASSWORD_RESET_EXPIRATION))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
     private String buildToken(Map<String, Object> extraClaims, User user, long expiration) {
         return Jwts.builder()
                 .setClaims(extraClaims)
                 .setSubject(user.getEmail())
-                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
+    // ✅ Nuevo: generar código UUID para reset
+    public String generatePasswordResetCode() {
+        return UUID.randomUUID().toString();
+    }
+
+    // ✅ Validar JWT (autenticación)
     public boolean isTokenValid(String token, User user) {
         final String username = extractUsername(token);
         return (username.equals(user.getEmail())) && !isTokenExpired(token);
     }
 
-    public String validatePasswordResetToken(String token) {
-        if (isTokenExpired(token)) {
-            throw new IllegalArgumentException("Token ha expirado");
-        }
-        
-        Claims claims = extractAllClaims(token);
-        if (!"password_reset".equals(claims.get("purpose"))) {
-            throw new IllegalArgumentException("Token inválido");
-        }
-        
-        return extractUsername(token);
-    }
-
+    // ✅ Extraer email desde token
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }

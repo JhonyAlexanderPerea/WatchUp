@@ -58,7 +58,7 @@ public class EmailService {
         }
     }
 
-    public void sendPasswordResetEmail(String toEmail, String resetToken) {
+    public void sendPasswordResetEmail(String toEmail, String resetCode) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -79,7 +79,7 @@ public class EmailService {
                     <p>Por razones de seguridad, te recomendamos cambiar tu contraseña regularmente.</p>
                 </body>
                 </html>
-                """, resetToken);
+                """, resetCode);
             
             helper.setText(content, true);
             mailSender.send(message);
