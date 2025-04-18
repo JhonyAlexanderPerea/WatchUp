@@ -68,16 +68,4 @@ public class AuthController {
         authService.resetPassword(token, newPassword);
         return ResponseEntity.ok().build();
     }
-
-    @PostMapping("/send-test-email")
-    public ResponseEntity<String> testEmail(@RequestParam String email) {
-        try {
-            emailService.sendActivationEmail(email, "TEST-123456");
-            return ResponseEntity.ok("Email enviado correctamente");
-        } catch (Exception e) {
-            return ResponseEntity.status(500)
-                    .body("Error al enviar email: " + e.getMessage());
-        }
-    }
-
 }
