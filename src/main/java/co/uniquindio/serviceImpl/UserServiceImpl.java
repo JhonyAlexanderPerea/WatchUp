@@ -3,6 +3,7 @@ package co.uniquindio.serviceImpl;
 import co.uniquindio.dtos.common.PaginatedContent;
 import co.uniquindio.dtos.request.PasswordUpdateRequest;
 import co.uniquindio.dtos.request.RegisterRequest;
+import co.uniquindio.dtos.request.UserUpdateRequest;
 import co.uniquindio.dtos.response.PaginatedUserResponse;
 import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.enums.Role;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -49,7 +51,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public PaginatedUserResponse getUsers(
+    public Optional<PaginatedUserResponse> getUsers(
             String fullName,
             String email,
             LocalDate registerDate,
@@ -98,14 +100,14 @@ public class UserServiceImpl implements UserService {
                 .pageSize(size)
                 .build();
 
-        return PaginatedUserResponse.builder()
+        return Optional.of(PaginatedUserResponse.builder()
                 .users(userResponses)
                 .paginated(pagination)
-                .build();
+                .build());
     }
 
     @Override
-    public UserResponse registerUser(RegisterRequest request) {
+    public Optional<UserResponse> registerUser(RegisterRequest request) {
         log.debug("Iniciando registro de usuario con email: {}", request.email());
 
         if (existsByEmail(request.email())) {
@@ -121,7 +123,7 @@ public class UserServiceImpl implements UserService {
             User savedUser = userRepository.save(user);
             log.debug("Usuario guardado exitosamente con ID: {}", savedUser.getId());
 
-            return userMapper.userToUserResponse(savedUser);
+            return Optional.of(userMapper.userToUserResponse(savedUser));
         } catch (Exception e) {
             log.error("Error al registrar usuario: ", e);
             throw new ApiExceptions.InternalServerErrorException("Error al guardar el usuario: " + e.getMessage());
@@ -135,10 +137,10 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserResponse getUserById(String id) {
+    public Optional<UserResponse> getUserById(String id) {
         log.debug("Buscando usuario con ID: {}", id);
 
-        return userRepository.findById(id)
+        return Optional.of(userRepository.findById(id)
                 .map
                 ( user -> {
                             log.debug("Usuario encontrado con ID: {}", id);
@@ -150,7 +152,7 @@ public class UserServiceImpl implements UserService {
                     return new ApiExceptions.NotFoundException(
                         "Usuario no encontrado"
                     );
-                });
+                }));
     }
 
     @Override
@@ -170,6 +172,11 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
         log.info("Contraseña actualizada con éxito para el usuario con ID: {}", id);
+    }
+
+    @Override
+    public Optional <UserResponse> updateUser(String id, UserUpdateRequest request) {
+        return Optional.empty();
     }
 
 }

@@ -2,15 +2,18 @@ package co.uniquindio.service;
 
 import co.uniquindio.dtos.request.PasswordUpdateRequest;
 import co.uniquindio.dtos.request.RegisterRequest;
+import co.uniquindio.dtos.request.UserUpdateRequest;
 import co.uniquindio.dtos.response.PaginatedUserResponse;
 import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.enums.Role;
 import co.uniquindio.enums.UserStatus;
+import jakarta.validation.Valid;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 public interface UserService {
-    PaginatedUserResponse getUsers(
+    Optional<PaginatedUserResponse> getUsers(
             String fullName,
             String email,
             LocalDate registerDate,
@@ -20,12 +23,14 @@ public interface UserService {
             int page,
             int size
     );
-    UserResponse registerUser(RegisterRequest request);
+    Optional<UserResponse> registerUser(RegisterRequest request);
 
     boolean existsByEmail(String email);
 
-    UserResponse getUserById(String id);
+    Optional<UserResponse> getUserById(String id);
 
     void updatePassword(String id, PasswordUpdateRequest request);
+
+    Optional <UserResponse> updateUser(String id, UserUpdateRequest request);
 
 }
