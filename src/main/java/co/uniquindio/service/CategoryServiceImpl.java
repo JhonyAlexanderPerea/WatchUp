@@ -2,6 +2,7 @@ package co.uniquindio.service;
 
 import co.uniquindio.dtos.request.CategoryRequest;
 import co.uniquindio.dtos.response.CategoryResponse;
+import co.uniquindio.dtos.response.PaginatedCategoryResponse;
 import co.uniquindio.model.Category;
 import co.uniquindio.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,8 +17,8 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
 
     @Override
-    public Optional<CategoryResponse> createCategory(CategoryRequest categoryRequest) {
-        return Optional.empty();
+    public CategoryResponse createCategory(CategoryRequest categoryRequest) {
+        return null;
     }
 
     @Override
@@ -26,8 +27,8 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Optional<CategoryResponse> getAllCategories(String order, String name, LocalDate registerDate) {
-        return Optional.empty();
+    public PaginatedCategoryResponse getAllCategories(String order, String name, LocalDate registerDate) {
+        return null;
     }
 
     @Override

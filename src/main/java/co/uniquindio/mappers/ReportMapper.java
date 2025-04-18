@@ -13,7 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.*;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {CommentMapper.class, CategoryMapper.class})
 public interface ReportMapper {
     @Mapping(target = "id", expression = "java(java.util.UUID.randomUUID().toString())")
     @Mapping(target = "status", defaultValue = "PENDING")
@@ -23,13 +23,16 @@ public interface ReportMapper {
     @Mapping(target = "comments", defaultExpression = "java(new java.util.ArrayList<>()")
     @Mapping(target = "images", expression = "java(convertMultipartFilesToBytes(reportRequest.images()))")
     @Mapping(target = "location", source = "location", qualifiedByName = "java(locationToGeoJsonPoint)")
-    @Mapping(target = "categories", source = "categories", qualifiedByName = "java(mapCategoryNamesToCategories)")
+    //@Mapping(target = "categories", source = "categories", qualifiedByName = "java(mapCategoryNamesToCategories)")
+    @Mapping(target = "categories", source = "categories")
     Report parseOf(ReportRequest reportRequest);
 
 
     @Mapping(target = "location", source = "location", qualifiedByName = "java(geoJsonPointToLocation)")
     @Mapping(target = "images", expression = "java(convertBytesToBase64(report.getImages()))")
     @Mapping(target = "categories", source = "categories", qualifiedByName = "java(mapCategoriesToStrings)")
+    //@Mapping(target = "comments", source = "comments", expression = "java(report.getComments().stream().map(commentMapper::toResponse).toList())")
+    @Mapping(target = "comments", source = "comments")
     ReportResponse toResponse(Report report);
 
     // Métodos de conversión personalizados

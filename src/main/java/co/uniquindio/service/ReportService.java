@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 public interface ReportService {
     ReportResponse createReport(ReportRequest reportRequest);
-    Optional<PaginatedReportResponse> getReports(String title, String userId, String category, String status,
+    PaginatedReportResponse getReports(String title, String userId, String category, String status,
                                                  String order, LocalDateTime creationDate, int page);
 
     Optional<ReportResponse> getReport(String id);

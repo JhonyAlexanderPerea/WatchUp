@@ -10,9 +10,13 @@ import org.mapstruct.MappingConstants;
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface CommentMapper {
     @Mapping(target = "id", defaultExpression = "java(java.util.UUID.randomUUID().toString())")
+    @Mapping(target = "userId", ignore = true)
+    @Mapping(target = "reportId", ignore = true)
     @Mapping(target = "creationDate", defaultExpression = "java(java.time.LocalDateTime.now())")
     @Mapping(target = "status", defaultValue = "ACTIVE")
     Comment parseOf(CommentRequest commentRequest);
 
+    @Mapping(target= "userName", ignore = true)
+    @Mapping(target= "date", source = "creationDate")
     CommentResponse toResponse(Comment comment);
 }

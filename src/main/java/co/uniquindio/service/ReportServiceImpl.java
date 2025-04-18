@@ -29,29 +29,42 @@ public class ReportServiceImpl implements ReportService{
     }
 
     @Override
-    public Optional<PaginatedReportResponse> getReports(String title, String userId, String category, String status, String order, LocalDateTime creationDate, int page) {
-        return Optional.empty();
+    public PaginatedReportResponse getReports(String title, String userId, String category, String status, String order, LocalDateTime creationDate, int page) {
+        return null;
     }
 
 
     @Override
     public Optional<ReportResponse> getReport(String id) {
-        return Optional.empty();
+        return reportRepository.findById(id).map(reportMapper::toResponse);
     }
 
     @Override
     public Optional<ReportResponse> changeReportStatus(String id, ReportStatus status) {
-        return Optional.empty();
+        Report report = reportRepository.findById(id).orElseThrow(()->new RuntimeException("No se encontro el reporte con el id: "+id));
+        report.setStatus(status);
+        reportRepository.save(report);
+        return Optional.of(reportMapper.toResponse(report));
     }
 
 
     @Override
     public Optional<ReportResponse> updateReport(String id, ReportRequest reportRequest) {
-        return Optional.empty();
+        if(reportRepository.existsById(id)){
+            Report report = reportMapper.parseOf(reportRequest);
+            report.setId(id);
+            return Optional.of(reportMapper.toResponse(reportRepository.save(report)));
+        }else{
+            throw new RuntimeException("No se encontro el reporte con el id: "+id);
+        }
     }
 
     @Override
     public void deleteReport(String id) {
-
+       if(reportRepository.existsById(id)){
+           reportRepository.deleteById(id);
+       }else{
+           throw new RuntimeException("No se encontro el reporte con el id: "+id);
+       }
     }
 }

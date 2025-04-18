@@ -36,7 +36,7 @@ public class ReportController {
 
     }
     @GetMapping
-    Optional<PaginatedReportResponse> getReports(@RequestParam(required = false)String title, @RequestParam(required = false)String userId,
+    PaginatedReportResponse getReports(@RequestParam(required = false)String title, @RequestParam(required = false)String userId,
                                                  @RequestParam(required = false)String category, @RequestParam(required = false)String status,
                                                  @RequestParam(required = false)String order,
                                                  @RequestParam(required = false) @DateTimeFormat(iso= DateTimeFormat.ISO.DATE_TIME) LocalDateTime registerDate,

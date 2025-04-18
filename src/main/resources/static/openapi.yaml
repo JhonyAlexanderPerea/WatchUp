@@ -581,12 +581,13 @@ paths:
       summary: Agregar un comentario a un reporte.
       operationId: addCommentReport
       parameters:
-        - name: idReporte
+        - name: reportId
           in: path
           required: true
           schema:
             type: string
       requestBody:
+        requeried: true
         content:
           application/json:
             schema:
@@ -604,6 +605,8 @@ paths:
           description: "Reporte no encontrado"
         "500":
           description: "Error en el servidor"
+        security:
+          - BearerAuth: [ ]
   /status-history:
     get:
       summary: Obtener el historial de estados de un reporte.
@@ -1082,9 +1085,13 @@ components:
     CommentResponse:
       type: object
       properties:
+        id:
+          type: String
         userName:
           type: string
         userId:
+          type: string
+        reportId:
           type: string
         comment:
           type: string
@@ -1097,10 +1104,10 @@ components:
     CommentRequest:
       type: object
       properties:
-        userId:
-          type: string
         comment:
           type: string
+          minLength: 1
+          maxLength: 500
     PaginatedCommentResponse:
       type: object
       properties:
@@ -1153,6 +1160,8 @@ components:
           type: string
         id:
           type: string
+        creationDate:
+          type: date
     PaginatedCategoriesResponse:
       type: object
       properties:
