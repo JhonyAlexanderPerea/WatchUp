@@ -1,13 +1,9 @@
 package co.uniquindio.dtos.response;
 
-import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+public record NotificationResponse(
+        ReportResponse report,
+        boolean isRead
+) {
 
-public class NotificationResponse {
-    private ReportResponse report;
-    private boolean isRead;
 }

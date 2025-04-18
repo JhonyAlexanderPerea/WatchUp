@@ -3,14 +3,10 @@ package co.uniquindio.dtos.response;
 import java.util.List;
 
 import co.uniquindio.dtos.common.PaginatedContent;
-import lombok.*;
 
+public record PaginatedCategoryResponse(
+        List<CategoryResponse> categories,
+        PaginatedContent paginated
+) {
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class PaginatedCategoryResponse {
-    private List<CategoryResponse> categories;
-    private PaginatedContent pagianted;
 }

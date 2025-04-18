@@ -5,16 +5,14 @@ import java.util.List;
 
 import co.uniquindio.model.Category;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+public record ReportRequest (
+        String title,
+        String description,
+        List<String> categories,
+        Location location,
+        List<MultipartFile> images
+){
 
-public class ReportRequest {
-    private String title;
-    private String description;
-    private Category category;
-    private Location location;
-    private List<String> images;    
 }

@@ -2,13 +2,11 @@ package co.uniquindio.dtos.common;
 
 import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class PaginatedContent {
-    private int totalPages;
-    private int totalElements;
-    private int currentPage;
-    private int pageSize;
+public record PaginatedContent(
+        int totalPages,
+        int totalElements,
+        int currentPage,
+        int pageSize
+) {
+
 }

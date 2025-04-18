@@ -5,12 +5,8 @@ import java.util.List;
 import co.uniquindio.dtos.common.PaginatedContent;
 import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+public record PaginatedNotificationResponse(
+        List<NotificationResponse> notifications,
+        PaginatedContent paginated) {
 
-public class PaginatedNotificationResponse {
-    private List<NotificationResponse> notifications;
-    private PaginatedContent paginated;
 }

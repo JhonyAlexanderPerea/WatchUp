@@ -1094,6 +1094,8 @@ components:
     CommentRequest:
       type: object
       properties:
+        userId:
+          type: string
         comment:
           type: string
     PaginatedCommentResponse:

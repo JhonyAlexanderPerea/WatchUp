@@ -2,16 +2,13 @@ package co.uniquindio.dtos.request;
 
 import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+public record RegisterRequest (
+        String fullName,
+        String city,
+        String phoneNumber,
+        String address,
+        String email,
+        String password
+){
 
-public class RegisterRequest {
-    private String fullName;
-    private String city;
-    private String phoneNumber;
-    private String address;
-    private String email;
-    private String password;
 }

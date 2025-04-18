@@ -2,13 +2,10 @@ package co.uniquindio.dtos.response;
 
 import lombok.*;
 
+public record CategoryResponse(
+        String name,
+        String description,
+        String id
+) {
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class CategoryResponse {
-    private String name;
-    private String description;
-    private String id;
 }

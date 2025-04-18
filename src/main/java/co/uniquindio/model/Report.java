@@ -3,7 +3,12 @@ package co.uniquindio.model;
 import co.uniquindio.dtos.common.Location;
 import co.uniquindio.enums.ReportStatus;
 import lombok.*;
+import org.bson.types.ObjectId;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
+import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.awt.*;
@@ -19,17 +24,19 @@ import java.util.List;
 public class Report {
     @Id
     @EqualsAndHashCode.Include
-    String id;
-
-    String title;
-    String description;
-    String category;
-    ReportStatus status;
-    LocalDateTime creationDate;
-    List<Image> image;
-    int important;
-    int isFake;
-    List<Comment> comments;
-    Location location;
+    private String id;
+    private ObjectId userId;
+    private String title;
+    private String description;
+    @DBRef
+    private List<Category> categories;
+    private ReportStatus status;
+    private LocalDateTime creationDate;
+    private List<byte[]> images;
+    private int important;
+    private int isFake;
+    private List<Comment> comments;
+    @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
+    private GeoJsonPoint location;
 
 }

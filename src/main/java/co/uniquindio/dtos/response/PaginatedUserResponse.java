@@ -5,12 +5,9 @@ import co.uniquindio.dtos.common.PaginatedContent;
 import java.util.List;
 import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+public record PaginatedUserResponse(
+        List<UserResponse> users,
+        PaginatedContent paginated
+) {
 
-public class PaginatedUserResponse {
-    private List<UserResponse> users;
-    private PaginatedContent paginated;
 }

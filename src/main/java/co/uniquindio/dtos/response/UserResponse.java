@@ -4,17 +4,15 @@ import co.uniquindio.enums.Role;
 
 import lombok.*;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
-public class UserResponse {
-    private String id;
-    private String fullName;
-    private String city;
-    private String phoneNumber;
-    private String address;
-    private String email;
-    private Role role;
-    private boolean isActive;
+public record UserResponse (
+        String id,
+        String fullName,
+        String city,
+        String phoneNumber,
+        String address,
+        String email,
+        Role role,
+        boolean isActive
+){
+
 }

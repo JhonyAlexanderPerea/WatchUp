@@ -1,6 +1,7 @@
 package co.uniquindio.controller;
 
 
+import co.uniquindio.dtos.common.ReportChangeStatus;
 import co.uniquindio.dtos.request.ReportRequest;
 import co.uniquindio.dtos.response.PaginatedReportResponse;
 import co.uniquindio.dtos.response.ReportResponse;
@@ -23,7 +24,7 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping
-    public Optional<ReportResponse> createReport(@RequestBody ReportRequest reportRequest) {
+    public ResponseEntity<ReportResponse> createReport(@RequestBody ReportRequest reportRequest) {
         var reportResponse = reportService.createReport(reportRequest);
 
         URI location = ServletUriComponentsBuilder.
@@ -40,8 +41,26 @@ public class ReportController {
                                                  @RequestParam(required = false)String order,
                                                  @RequestParam(required = false) @DateTimeFormat(iso= DateTimeFormat.ISO.DATE_TIME) LocalDateTime registerDate,
                                                  @RequestParam(required = false) @DefaultValue(value = "0") int page ){
-        return reportService.getReports(title,userId,category,status,order,registerDate);
+        return reportService.getReports(title,userId,category,status,order,registerDate, page);
     }
 
+    @GetMapping("/{id}")
+    Optional<ReportResponse> getReport(@PathVariable String id){
+        return reportService.getReport(id);
+    }
 
+    @PatchMapping("/{id}")
+    Optional<ReportResponse> changeReportStatus(@PathVariable String id, @RequestBody ReportChangeStatus status){
+        return reportService.changeReportStatus(id, status.newStatus());
+    }
+
+    @PutMapping("/{id}")
+    Optional<ReportResponse> updateReport(@PathVariable String id, @RequestBody ReportRequest reportRequest){
+        return reportService.updateReport(id, reportRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    void deleteReport(@PathVariable String id){
+        reportService.deleteReport(id);
+    }
 }
