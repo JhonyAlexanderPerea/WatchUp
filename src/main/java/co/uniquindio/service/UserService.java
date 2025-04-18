@@ -1,5 +1,6 @@
 package co.uniquindio.service;
 
+import co.uniquindio.dtos.request.AccountActivationRequest;
 import co.uniquindio.dtos.request.PasswordUpdateRequest;
 import co.uniquindio.dtos.request.RegisterRequest;
 import co.uniquindio.dtos.request.UserUpdateRequest;
@@ -33,4 +34,7 @@ public interface UserService {
 
     Optional <UserResponse> updateUser(String id, UserUpdateRequest request);
 
+    void deleteUser(String id);
+
+    void activateAccount(AccountActivationRequest request);
 }

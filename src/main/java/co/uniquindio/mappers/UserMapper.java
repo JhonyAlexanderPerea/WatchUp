@@ -20,6 +20,7 @@ public interface UserMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "activationCode", ignore = true)
     @Mapping(target = "activationCodeExpiry", ignore = true)
+    @Mapping(target = "resetPasswordToken", ignore = true)
     @Mapping(target = "role", constant = "USER")
     @Mapping(target = "status", constant = "INACTIVE")
     @Mapping(target = "location", expression = "java(locationService.getCurrentLocation())")

@@ -1,6 +1,7 @@
 package co.uniquindio.serviceImpl;
 
 import co.uniquindio.dtos.common.PaginatedContent;
+import co.uniquindio.dtos.request.AccountActivationRequest;
 import co.uniquindio.dtos.request.PasswordUpdateRequest;
 import co.uniquindio.dtos.request.RegisterRequest;
 import co.uniquindio.dtos.request.UserUpdateRequest;
@@ -13,6 +14,7 @@ import co.uniquindio.mappers.UserMapper;
 import co.uniquindio.model.User;
 import co.uniquindio.repository.UserRepository;
 import co.uniquindio.service.UserService;
+import co.uniquindio.util.EmailService;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,8 +28,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 
 @Service
 @Slf4j
@@ -37,17 +41,19 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailService emailService;
 
 
     @Autowired
     public UserServiceImpl(MongoTemplate mongoTemplate,
                            UserRepository userRepository,
                            UserMapper userMapper,
-                           PasswordEncoder passwordEncoder) {
+                           PasswordEncoder passwordEncoder, EmailService emailService) {
         this.mongoTemplate = mongoTemplate;
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.emailService = emailService;
     }
 
     @Override
@@ -115,13 +121,24 @@ public class UserServiceImpl implements UserService {
         }
 
         try {
+
+            String activationCode = generateActivationCode();
+            LocalDateTime expiryTime = LocalDateTime.now().plusMinutes(15);
+
+            // Crear y guardar usuario
             User user = userMapper.registerRequestToUser(request);
             user.setPassword(passwordEncoder.encode(request.password()));
-
+            user.setStatus(UserStatus.INACTIVE);
+            user.setActivationCode(activationCode);
+            user.setActivationCodeExpiry(expiryTime);
             log.debug("Usuario mapeado antes de guardar: {}", user);
 
             User savedUser = userRepository.save(user);
             log.debug("Usuario guardado exitosamente con ID: {}", savedUser.getId());
+
+            // Enviar email de activación
+            emailService.sendActivationEmail(savedUser.getEmail(), activationCode);
+
 
             return Optional.of(userMapper.userToUserResponse(savedUser));
         } catch (Exception e) {
@@ -240,5 +257,46 @@ public class UserServiceImpl implements UserService {
                     return new ApiExceptions.ResourceNotFoundException("Usuario no encontrado con ID: " + id);
                 });
     }
+
+    @Override
+    public void deleteUser(String id) {
+        try{
+            User user = userRepository.findById(id).get();
+            user.setStatus(UserStatus.INACTIVE);
+            userRepository.save(user);
+            log.info("Usuario con ID: {} se ha desactivado exitosamente", id);
+        } catch (Exception e) {
+            throw new ApiExceptions.NotFoundException("Usuario no encontrado con ID: " + id);
+        }
+
+    }
+
+    @Override
+    public void activateAccount(AccountActivationRequest request) {
+        User user = userRepository.findByEmail(request.email())
+                .orElseThrow(() -> new ApiExceptions.NotFoundException("Usuario no encontrado"));
+
+        if (user.getStatus().equals(UserStatus.ACTIVE)) {
+            throw new ApiExceptions.InvalidOperationException("La cuenta ya está activada");
+        }
+
+        if (user.getActivationCodeExpiry().isBefore(LocalDateTime.now())) {
+            throw new ApiExceptions.InvalidOperationException("El código de activación ha expirado");
+        }
+
+        if (!user.getActivationCode().equals(request.activationCode())) {
+            throw new ApiExceptions.InvalidOperationException("Código de activación inválido");
+        }
+
+        user.setStatus(UserStatus.ACTIVE);
+        user.setActivationCode(null);
+        user.setActivationCodeExpiry(null);
+        userRepository.save(user);
+    }
+
+    private String generateActivationCode() {
+        return String.format("%06d", new Random().nextInt(999999));
+    }
+
 
 }

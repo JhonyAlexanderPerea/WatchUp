@@ -61,4 +61,7 @@ public class User {
 
     @Field("location")
     private Location location;
+
+    private String resetPasswordToken;
+
 }

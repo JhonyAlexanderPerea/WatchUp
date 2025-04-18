@@ -190,6 +190,10 @@ paths:
       responses:
         "200":
           description: "Usuario actualizado con éxito"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
         "400":
           description: "Error en los datos enviados"
         "404":

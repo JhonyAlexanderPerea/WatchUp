@@ -47,5 +47,25 @@ public class ApiExceptions {
         }
     }
 
+    public static class InvalidOperationException extends RuntimeException {
+        public InvalidOperationException(String message) {super(message);}
+    }
+
+    public static class InvalidCredentialsException extends RuntimeException {
+        public InvalidCredentialsException(String message) {super(message);}
+    }
+
+    public static class AccountNotActivatedException extends RuntimeException {
+        public AccountNotActivatedException(String message) {super(message);}
+    }
+
+    public static class InvalidTokenException extends RuntimeException {
+        public InvalidTokenException(String mesagge) {super(mesagge);}
+    }
+
+    public static class EmailSendException extends RuntimeException {
+        public EmailSendException(String message) {super(message);}
+    }
+
     // Agrega más excepciones personalizadas aquí si lo necesitas.
 }
