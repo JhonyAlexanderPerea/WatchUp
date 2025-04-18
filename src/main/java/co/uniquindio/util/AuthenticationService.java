@@ -1,7 +1,7 @@
 package co.uniquindio.util;
 
 import co.uniquindio.dtos.request.*;
-import co.uniquindio.dtos.response.AuthenticationResponse;
+import co.uniquindio.dtos.response.LoginResponse;
 import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.enums.UserStatus;
 import co.uniquindio.exceptions.ApiExceptions;
@@ -27,7 +27,7 @@ public class AuthenticationService {
     private final UserMapper userMapper;
     private final EmailService emailService;
 
-    public AuthenticationResponse login(AuthenticationRequest request) {
+    public LoginResponse login(AuthenticationRequest request) {
         User user = userRepository.findByEmail(request.email())
                 .orElseThrow(() -> new ApiExceptions.InvalidCredentialsException("Credenciales inválidas"));
 
@@ -42,7 +42,7 @@ public class AuthenticationService {
         String token = jwtService.generateToken(user);
         UserResponse userResponse = userMapper.userToUserResponse(user);
 
-        return new AuthenticationResponse(token, "Bearer", userResponse);
+        return new LoginResponse(token, "Bearer", userResponse);
     }
 
     public UserResponse register(RegisterRequest request) {

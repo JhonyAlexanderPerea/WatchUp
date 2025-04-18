@@ -3,7 +3,7 @@ package co.uniquindio.controller;
 import co.uniquindio.dtos.request.AccountActivationRequest;
 import co.uniquindio.dtos.request.AuthenticationRequest;
 import co.uniquindio.dtos.request.RegisterRequest;
-import co.uniquindio.dtos.response.AuthenticationResponse;
+import co.uniquindio.dtos.response.LoginResponse;
 import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.util.AuthenticationService;
 import co.uniquindio.util.EmailService;
@@ -23,7 +23,7 @@ public class AuthController {
     private final EmailService emailService;
 
     @PostMapping("/login")
-    public Optional<ResponseEntity<AuthenticationResponse>> login(
+    public Optional<ResponseEntity<LoginResponse>> login(
             @Valid @RequestBody AuthenticationRequest request
     ) {
         return Optional.of(ResponseEntity.ok(authService.login(request)));

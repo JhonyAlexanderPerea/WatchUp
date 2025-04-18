@@ -25,14 +25,110 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  token:
-                    type: string
+                $ref: "#/components/schemas/LoginResponse"
         "401":
           description: "Credenciales inválidas"
         "500":
           description: "Error en el servidor"
+  /auth/register:
+    post:
+      summary: Registrar un nuevo usuario
+      operationId: register
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RegisterRequest"
+      responses:
+        "200":
+          description: "Usuario registrado exitosamente"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+        "400":
+          description: "Datos de registro inválidos"
+        "500":
+          description: "Error en el servidor"
+
+  /auth/activate:
+      post:
+        summary: Activar cuenta de usuario
+        operationId: activateAccount
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountActivationRequest"
+        responses:
+          "200":
+            description: "Cuenta activada exitosamente"
+          "400":
+            description: "Token de activación inválido"
+          "500":
+            description: "Error en el servidor"
+
+  /auth/resend-activation:
+      post:
+        summary: Reenviar email de activación
+        operationId: resendActivation
+        parameters:
+          - name: email
+            in: query
+            required: true
+            schema:
+              type: string
+        responses:
+          "200":
+            description: "Email de activación reenviado exitosamente"
+          "404":
+            description: "Email no encontrado"
+          "500":
+            description: "Error en el servidor"
+
+  /auth/forgot-password:
+      post:
+        summary: Solicitar restablecimiento de contraseña
+        operationId: forgotPassword
+        parameters:
+          - name: email
+            in: query
+            required: true
+            schema:
+              type: string
+        responses:
+          "200":
+            description: "Email de restablecimiento enviado exitosamente"
+          "404":
+            description: "Email no encontrado"
+          "500":
+            description: "Error en el servidor"
+
+  /auth/reset-password:
+      post:
+        summary: Restablecer contraseña
+        operationId: resetPassword
+        parameters:
+          - name: token
+            in: query
+            required: true
+            schema:
+              type: string
+          - name: newPassword
+            in: query
+            required: true
+            schema:
+              type: string
+        responses:
+          "200":
+            description: "Contraseña restablecida exitosamente"
+          "400":
+            description: "Token inválido o expirado"
+          "500":
+            description: "Error en el servidor"
+
   /users:
     get:
       summary: Obtener todos los usuarios
@@ -973,8 +1069,9 @@ components:
         role:
           type: string
           enum: [ USER,ADMIN ]
-        isActive:
-          type: boolean
+        status:
+          type: string
+          enum: [ REGISTERED, ACTIVE, INACTIVE ]
     RegisterRequest:
       type: object
       required: ["fullName","city","phone","address","email","password"]
@@ -1219,6 +1316,7 @@ components:
         destinyEmail:
           type: string
           format: email
+
     PaginatedCodeResponse:
       type: object
       properties:
@@ -1228,3 +1326,23 @@ components:
             $ref: '#/components/schemas/CodeResponse'
         paginated:
           $ref: '#/components/schemas/PaginatedContent'
+
+    LoginResponse:
+      type: object
+      properties:
+        token:
+          type: string
+        user:
+          $ref: "#/components/schemas/UserResponse"
+
+    AccountActivationRequest:
+      type: object
+      required:
+        - activationCode
+        - email
+      properties:
+        activationCode:
+          type: string
+        email:
+          type: string
+          format: email
