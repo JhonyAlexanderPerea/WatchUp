@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.time.LocalDateTime;
 
 public interface ReportService {
-    ReportResponse createReport(ReportRequest reportRequest);
+    ReportResponse createReport(ReportRequest reportRequest, String userId);
     PaginatedReportResponse getReports(String title, String userId, String category, String status,
                                                  String order, LocalDateTime creationDate, int page);
 

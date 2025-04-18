@@ -1,8 +1,8 @@
 package co.uniquindio.dtos.request;
 
-import java.lang.reflect.AccessFlag.Location;
 import java.util.List;
 
+import co.uniquindio.dtos.common.Location;
 import co.uniquindio.model.Category;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;

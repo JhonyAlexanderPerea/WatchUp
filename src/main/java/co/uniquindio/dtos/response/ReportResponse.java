@@ -9,9 +9,10 @@ import lombok.*;
 public record ReportResponse(
         String id,
         String title,
+        String userId,
         List <CategoryResponse> categories,
         String description,
-        Location Location,
+        Location location,
         ReportResponse status,
         int important,
         int isFake,

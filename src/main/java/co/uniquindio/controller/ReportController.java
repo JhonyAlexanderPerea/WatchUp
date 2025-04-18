@@ -10,6 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -24,8 +26,8 @@ public class ReportController {
     private final ReportService reportService;
 
     @PostMapping
-    public ResponseEntity<ReportResponse> createReport(@RequestBody ReportRequest reportRequest) {
-        var reportResponse = reportService.createReport(reportRequest);
+    public ResponseEntity<ReportResponse> createReport(@RequestBody ReportRequest reportRequest, @AuthenticationPrincipal UserDetails userDetails) {
+        var reportResponse = reportService.createReport(reportRequest, userDetails.getUsername());
 
         URI location = ServletUriComponentsBuilder.
                 fromCurrentRequest().
