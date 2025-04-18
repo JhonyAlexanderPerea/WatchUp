@@ -1,6 +1,7 @@
 package co.uniquindio.dtos.response;
 
 import co.uniquindio.enums.Role;
+import co.uniquindio.enums.UserStatus;
 
 public record UserResponse (
     String id,
@@ -9,6 +10,6 @@ public record UserResponse (
     String email,
     String phoneNumber,
     String address,
-    boolean isActive,
+    UserStatus status,
     Role role
 ){}

@@ -1,6 +1,7 @@
 package co.uniquindio.controller;
 
 
+import co.uniquindio.dtos.request.PasswordUpdateRequest;
 import co.uniquindio.dtos.request.RegisterRequest;
 import co.uniquindio.dtos.response.PaginatedUserResponse;
 import co.uniquindio.dtos.response.UserResponse;
@@ -50,6 +51,12 @@ public class UserController {
     public ResponseEntity<UserResponse> getUser(@PathVariable String id){
         UserResponse response = userService.getUserById(id);
         return ResponseEntity.ok(response);
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<Void> updatePassword(@PathVariable String id, @Valid @RequestBody PasswordUpdateRequest request){
+        userService.updatePassword(id, request);
+        return ResponseEntity.noContent().build();
     }
 
 }

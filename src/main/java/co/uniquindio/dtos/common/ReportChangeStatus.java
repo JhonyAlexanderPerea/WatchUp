@@ -1,5 +1,5 @@
 package co.uniquindio.dtos.common;
 
-import co.uniquindio.enums.Status;
+import co.uniquindio.enums.ReportStatus;
 
-public record ReportChangeStatus (Status newStatus) {}
+public record ReportChangeStatus (ReportStatus newStatus) {}

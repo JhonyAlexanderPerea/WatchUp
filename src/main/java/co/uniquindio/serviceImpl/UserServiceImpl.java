@@ -1,9 +1,12 @@
 package co.uniquindio.serviceImpl;
 
 import co.uniquindio.dtos.common.PaginatedContent;
+import co.uniquindio.dtos.request.PasswordUpdateRequest;
 import co.uniquindio.dtos.request.RegisterRequest;
 import co.uniquindio.dtos.response.PaginatedUserResponse;
 import co.uniquindio.dtos.response.UserResponse;
+import co.uniquindio.enums.Role;
+import co.uniquindio.enums.UserStatus;
 import co.uniquindio.exceptions.ApiExceptions;
 import co.uniquindio.mappers.UserMapper;
 import co.uniquindio.model.User;
@@ -22,7 +25,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -150,4 +152,24 @@ public class UserServiceImpl implements UserService {
                     );
                 });
     }
+
+    @Override
+    public void updatePassword(String id, PasswordUpdateRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ApiExceptions.ResourceNotFoundException("Usuario no encontrado con ID: " + id));
+
+        if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
+            throw new ApiExceptions.InvalidPasswordException("La contraseña actual no es correcta");
+        }
+
+        // Validar que la nueva contraseña no sea igual a la actual
+        if (passwordEncoder.matches(request.newPassword(), user.getPassword())) {
+            throw new ApiExceptions.InvalidPasswordException("La nueva contraseña no puede ser igual a la actual");
+        }
+
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+        log.info("Contraseña actualizada con éxito para el usuario con ID: {}", id);
+    }
+
 }

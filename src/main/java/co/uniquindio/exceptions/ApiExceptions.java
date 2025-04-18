@@ -33,5 +33,19 @@ public class ApiExceptions {
         }
     }
 
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public static class ResourceNotFoundException extends RuntimeException{
+        public ResourceNotFoundException(String message) {
+            super(message);
+        }
+    }
+
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public static class InvalidPasswordException extends RuntimeException {
+        public InvalidPasswordException(String message) {
+            super(message);
+        }
+    }
+
     // Agrega más excepciones personalizadas aquí si lo necesitas.
 }

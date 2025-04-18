@@ -2,6 +2,7 @@ package co.uniquindio.model;
 
 import co.uniquindio.dtos.common.Location;
 import co.uniquindio.enums.Role;
+import co.uniquindio.enums.UserStatus;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -52,8 +53,8 @@ public class User {
     @Field("activation_code_expiry")
     private LocalDateTime activationCodeExpiry;
 
-    @Field("isActive")
-    private boolean isActive;
+    @Field("status")
+    private UserStatus status;
 
     @NotNull(message = "Debe existir un rol")
     private Role role;
