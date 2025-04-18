@@ -188,7 +188,7 @@ paths:
             schema:
               type: array
               items:
-                $ref: "#/components/schemas/UserUpdateRequest"
+                $ref: "#/components/schemas/UserResponse"
       responses:
         "200":
           description: "Usuario actualizado con éxito"
@@ -512,7 +512,7 @@ paths:
         "500":
           description: "Error en el servidor"
 
-  /comments:
+  /rerports/{id}/comments:
     get:
       summary: Obtener los comentarios de un reporte.
       operationId: getCommentsReport
@@ -663,7 +663,7 @@ paths:
         '500':
           description: "Error en el servidor"
 
-  /comments/{id}:
+  /rerports/{id}/comments/{id}:
     delete:
       summary: Eliminar un comentario.
       operationId: deleteComment
@@ -1091,6 +1091,9 @@ components:
         date:
           type: date-time
           example: "2000-01-01|10:10:23"
+        status:
+          type: string
+          enum : [ACTIVE, DELETED, REJECTED]
     CommentRequest:
       type: object
       properties:

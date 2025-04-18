@@ -35,6 +35,7 @@ public class Report {
     private List<byte[]> images;
     private int important;
     private int isFake;
+    @DBRef
     private List<Comment> comments;
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     private GeoJsonPoint location;
