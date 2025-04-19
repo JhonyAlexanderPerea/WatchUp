@@ -72,15 +72,16 @@ public class ReportController {
     }
 
 
-    @PutMapping("/{id}")
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Optional<ReportResponse> updateReport(@PathVariable String id,
                                           @RequestPart("metadata") ReportRequest reportRequest,
-                                          @RequestPart("newImages") List<MultipartFile> newImages,
-                                          @RequestPart("imagesToDelete")List<Integer> imagesToDelete,
+                                          @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages,
+                                          @RequestParam(value = "imagesToDelete" ,required = false)List<Integer> imagesToDelete,
+                                          @RequestParam(value = "categoriesToDelete", required = false) List<Integer> categoriesToDelete,
                                           @AuthenticationPrincipal UserDetails userDetails){
         User user = ((CustomUserDetails) userDetails).getUser();
         String userId = user.getId();
-        return reportService.updateReport(id, newImages,imagesToDelete, reportRequest, userId);
+        return reportService.updateReport(id, newImages,imagesToDelete,categoriesToDelete, reportRequest, userId);
     }
 
     @DeleteMapping("/{id}")

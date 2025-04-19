@@ -9,6 +9,7 @@ import co.uniquindio.dtos.response.PaginatedReportResponse;
 import co.uniquindio.dtos.response.ReportResponse;
 import co.uniquindio.enums.ReportStatus;
 import co.uniquindio.mappers.ReportMapper;
+import co.uniquindio.model.Category;
 import co.uniquindio.model.Report;
 import co.uniquindio.model.User;
 import co.uniquindio.repository.ReportRepository;
@@ -29,6 +30,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 @RequiredArgsConstructor
@@ -54,6 +56,7 @@ public class ReportServiceImpl implements ReportService{
     public PaginatedReportResponse getReports(String title, String userId, String category,
                                               String status, String order, LocalDateTime creationDate,
                                               Location location, int page) {
+
         // 1. Configurar paginación y ordenamiento
         Pageable pageable = PageRequest.of(page, 10, parseSort(order)); // 10 items por página
         org.springframework.data.mongodb.core.query.Query dynamicQuery = new Query().with(pageable);
@@ -132,10 +135,13 @@ public class ReportServiceImpl implements ReportService{
 
     @Override
     public Optional<ReportResponse> updateReport(String id, List<MultipartFile>newImages,
-                                                 List<Integer> imagesToDelete,ReportRequest reportRequest,
+                                                 List<Integer> imagesToDelete,
+                                                 List<Integer>categoriesToDelete, ReportRequest reportRequest,
                                                  String userId) {
         Report report = reportRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se encontro el reporte con el id: " + id));
+
+        //CORREGIR
         if (!userIdIsValid(userId)) {
             throw new RuntimeException("El id del usuario no es valido");
         }
@@ -143,21 +149,51 @@ public class ReportServiceImpl implements ReportService{
         report.setDescription(reportRequest.description() != null ? reportRequest.description() : report.getDescription());
 
         //Aqui va lo de categorias --> se esta pensando // Valida y convierte IDs a objetos Category
+        List<Category> categories = report.getCategories();
+
+        if (categoriesToDelete != null && !categoriesToDelete.isEmpty()) {
+            categoriesToDelete.sort((o1, o2) -> o2.compareTo(o1));
+            for (int index : categoriesToDelete) {
+                if (index <= categories.size()) {
+                    categories.remove(index);
+                }
+            }
+        }
+        if (reportRequest.categories() != null && !reportRequest.categories().isEmpty()) {
+            List<Category> newCategories =reportRequest.categories().stream().map(categoryService::getCategoryByName).toList();
+            for (Category category : newCategories) {
+                if(!categories.isEmpty()) {
+                    for (Category auxCategory : categories) {
+                        if (!(category.getId().equals(auxCategory.getId()))) {
+                            categories.add(category);
+                        }
+                    }
+                }else{categories.addAll(newCategories);}
+            }
+        }
 
         report.setLocation(reportRequest.location() != null ? reportMapper.locationToGeoJsonPoint(reportRequest.location())
                 : report.getLocation()); // Convierte Location a GeoJsonPoint
 
         List<byte[]> images = report.getImages();
-        if (imagesToDelete != null) {
-            for (Integer index : imagesToDelete) {
-                images.remove(index.intValue());
+        if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
+            imagesToDelete.sort((o1, o2) -> o2.compareTo(o1));
+            for (int index : imagesToDelete) {
+                if(index<=images.size()){
+                    images.remove(index);
+                }
             }
         }
-        if (newImages != null) {
-            images.addAll(multiPartFileToByte(newImages));
+        if (newImages != null && !newImages.isEmpty()) {
+            List<byte[]> auxImages = multiPartFileToByte(newImages);
+            for (int i = 0; i < newImages.size(); i++) {
+                if (newImages.get(i)!=null &&!newImages.get(i).isEmpty()) {
+                    images.add(auxImages.get(i));
+                }
+            }
         }
-
-
+        report.setImages(images);
+        report.setCategories(categories);
         return Optional.of(reportMapper.toResponse(reportRepository.save(report)));
     }
 
@@ -188,4 +224,5 @@ public class ReportServiceImpl implements ReportService{
             throw new RuntimeException("Alguien esta pendejo");
         }
     }
+
 }

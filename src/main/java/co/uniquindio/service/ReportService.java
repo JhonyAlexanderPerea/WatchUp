@@ -21,6 +21,8 @@ public interface ReportService {
     Optional<ReportResponse> getReport(String id);
     Optional<ReportResponse> changeReportStatus(String id, ReportStatus status);
     Optional<ReportResponse> updateReport(String id, List<MultipartFile> newImages,
-                                          List<Integer>imagesToDelete,ReportRequest reportRequest, String userId);
+                                          List<Integer>imagesToDelete,
+                                          List<Integer> categoriesToDelete,
+                                          ReportRequest reportRequest, String userId);
     void deleteReport(String id);
 }
