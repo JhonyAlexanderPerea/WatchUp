@@ -5,6 +5,7 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -47,9 +48,9 @@ public class JwtService {
     }
 
     // ✅ Validar JWT (autenticación)
-    public boolean isTokenValid(String token, User user) {
+    public boolean isTokenValid(String token, UserDetails user) {
         final String username = extractUsername(token);
-        return (username.equals(user.getEmail())) && !isTokenExpired(token);
+        return (username.equals(user.getUsername())) && !isTokenExpired(token);
     }
 
     // ✅ Extraer email desde token

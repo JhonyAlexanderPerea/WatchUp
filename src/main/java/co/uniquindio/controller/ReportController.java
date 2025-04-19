@@ -1,10 +1,12 @@
 package co.uniquindio.controller;
 
 
+import co.uniquindio.dtos.common.CustomUserDetails;
 import co.uniquindio.dtos.common.ReportChangeStatus;
 import co.uniquindio.dtos.request.ReportRequest;
 import co.uniquindio.dtos.response.PaginatedReportResponse;
 import co.uniquindio.dtos.response.ReportResponse;
+import co.uniquindio.model.User;
 import co.uniquindio.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -33,7 +35,9 @@ public class ReportController {
     public ResponseEntity<ReportResponse> createReport(@RequestPart("metadata") ReportRequest reportRequest,
                                                        @RequestPart("images") List<MultipartFile> images,
                                                        @AuthenticationPrincipal UserDetails userDetails) {
-        var reportResponse = reportService.createReport(reportRequest, images, userDetails.getUsername());
+        User user = ((CustomUserDetails) userDetails).getUser();
+        String userId = user.getId();
+        var reportResponse = reportService.createReport(reportRequest, images,userId);
 
         URI location = ServletUriComponentsBuilder.
                 fromCurrentRequest().
