@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,8 +27,8 @@ public class ReportServiceImpl implements ReportService{
     private final CategoryService categoryService;
 
     @Override
-    public ReportResponse createReport(ReportRequest reportRequest, String userId) {
-        Report newReport = reportMapper.parseOf(reportRequest, categoryService);
+    public ReportResponse createReport(ReportRequest reportRequest, List<MultipartFile>images, String userId) {
+        Report newReport = reportMapper.parseOf(reportRequest, images, categoryService);
         ObjectId id = new ObjectId(userId);
         if(!userIdIsValid(userId)){
             throw new RuntimeException("El id del usuario no es valido");
@@ -56,10 +57,11 @@ public class ReportServiceImpl implements ReportService{
     }
 
 
+    //MODIFICAR PARA QUE GUARDE LAS IMAGENES O QUE SE PUEDAN BORRAR O HACER ESA GESTION DE LAS IMAGENS DEL REPORTE
     @Override
-    public Optional<ReportResponse> updateReport(String id, ReportRequest reportRequest) {
+    public Optional<ReportResponse> updateReport(String id, List<MultipartFile>images, ReportRequest reportRequest) {
         if(reportRepository.existsById(id)){
-            Report report = reportMapper.parseOf(reportRequest, categoryService);
+            Report report = reportMapper.parseOf(reportRequest, images, categoryService);
             report.setId(id);
             return Optional.of(reportMapper.toResponse(reportRepository.save(report)));
         }else{

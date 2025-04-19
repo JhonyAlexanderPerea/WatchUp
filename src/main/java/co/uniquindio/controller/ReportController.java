@@ -9,14 +9,17 @@ import co.uniquindio.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -25,9 +28,12 @@ import java.util.Optional;
 public class ReportController {
     private final ReportService reportService;
 
-    @PostMapping
-    public ResponseEntity<ReportResponse> createReport(@RequestBody ReportRequest reportRequest, @AuthenticationPrincipal UserDetails userDetails) {
-        var reportResponse = reportService.createReport(reportRequest, userDetails.getUsername());
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<ReportResponse> createReport(@RequestPart("metadata") ReportRequest reportRequest,
+                                                       @RequestPart("images") List<MultipartFile> images,
+                                                       @AuthenticationPrincipal UserDetails userDetails) {
+        var reportResponse = reportService.createReport(reportRequest, images, userDetails.getUsername());
 
         URI location = ServletUriComponentsBuilder.
                 fromCurrentRequest().
@@ -35,8 +41,8 @@ public class ReportController {
                 buildAndExpand(reportResponse.id()).
                 toUri();
         return ResponseEntity.created(location).body(reportResponse);
-
     }
+
     @GetMapping
     PaginatedReportResponse getReports(@RequestParam(required = false)String title, @RequestParam(required = false)String userId,
                                                  @RequestParam(required = false)String category, @RequestParam(required = false)String status,
@@ -57,8 +63,10 @@ public class ReportController {
     }
 
     @PutMapping("/{id}")
-    Optional<ReportResponse> updateReport(@PathVariable String id, @RequestBody ReportRequest reportRequest){
-        return reportService.updateReport(id, reportRequest);
+    Optional<ReportResponse> updateReport(@PathVariable String id,
+                                          @RequestPart ReportRequest reportRequest,
+                                          @RequestPart List<MultipartFile> imagesPlus){
+        return reportService.updateReport(id, imagesPlus, reportRequest);
     }
 
     @DeleteMapping("/{id}")

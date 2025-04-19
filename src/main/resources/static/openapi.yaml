@@ -295,10 +295,24 @@ paths:
       requestBody:
         required: true
         content:
-          application/json:
+          #creado con IA (deepseek)
+          multipart/form-data: # Tipo de contenido
             schema:
-              items:
-                $ref: "#/components/schemas/ReportRequest"
+              type: object
+              properties:
+                metadata: # Parte 1: JSON con metadatos
+                  type: string
+                  format: binary
+                  description: JSON con los datos del reporte, basando en reportRequest.
+                images: # Parte 2: Archivos de imágenes
+                  type: array
+                  items:
+                    type: string
+                    format: binary
+                  description: Lista de imágenes.
+            encoding:
+              metadata: # Especifica que "metadata" es un JSON
+                contentType: application/json
       responses:
         "201":
           description: "Reporte creado con éxito"
@@ -663,8 +677,8 @@ paths:
           schema:
             type: string
       requestBody:
-        requeried: true
         content:
+          requeried: true
           application/json:
             schema:
               $ref: '#/components/schemas/CommentRequest'
@@ -1147,12 +1161,6 @@ components:
           example: "SEGURIDAD"
         location:
           $ref: "#/components/schemas/Location"
-        images:
-          type: array
-          items:
-            type: string
-            format: uri
-          example: ["https://ejemplo.com/imagen1.jpg","https://ejemplo.com/imagen2.jpg"]
     ReportChangeStatus:
       type: object
       properties:

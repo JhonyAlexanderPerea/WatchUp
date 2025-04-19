@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import co.uniquindio.dtos.common.Location;
+import co.uniquindio.enums.ReportStatus;
 import lombok.*;
 
 public record ReportResponse(
@@ -13,7 +14,7 @@ public record ReportResponse(
         List <CategoryResponse> categories,
         String description,
         Location location,
-        ReportResponse status,
+        ReportStatus status,
         int important,
         int isFake,
         LocalDateTime creationDate,

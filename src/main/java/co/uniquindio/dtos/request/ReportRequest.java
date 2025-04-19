@@ -11,8 +11,7 @@ public record ReportRequest (
         String title,
         String description,
         List<String> categories,
-        Location location,
-        List<MultipartFile> images
+        Location location
 ){
 
 }

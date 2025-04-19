@@ -5,9 +5,10 @@ import java.util.List;
 import lombok.*;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 
+@Builder
 public record Location(
         @DefaultValue(value = "Point")
         String type,
-        Double[] coordinates){
+        List<Double>coordinates){
 
 }

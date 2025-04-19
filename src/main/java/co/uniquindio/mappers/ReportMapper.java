@@ -25,13 +25,12 @@ public interface ReportMapper {
     @Mapping(target = "important", constant = "0")
     @Mapping(target = "isFake", constant = "0")
     @Mapping(target = "comments", expression = "java(new java.util.ArrayList<>())")
-    @Mapping(target = "images", expression = "java(convertMultipartFilesToBytes(reportRequest.images()))")
+    @Mapping(target = "images", expression = "java(convertMultipartFilesToBytes(images))")
     @Mapping(target = "location", expression = "java(locationToGeoJsonPoint(reportRequest.location()))")
     @Mapping(target = "categories", expression = "java(mapCategoryNamesToCategories(reportRequest.categories(), categoryService))")
-    Report parseOf(ReportRequest reportRequest, @Context CategoryService categoryService);
+    Report parseOf(ReportRequest reportRequest, List<MultipartFile>images, @Context CategoryService categoryService);
 
 
-    @Mapping(target = "id", source = "id")
     @Mapping(target = "location", expression = "java(geoJsonPointToLocation(report.getLocation()))")
     @Mapping(target = "images", expression = "java(convertBytesToBase64(report.getImages()))")
     @Mapping(target = "categories", source = "categories")
@@ -66,8 +65,8 @@ public interface ReportMapper {
         }
         // GeoJsonPoint espera [longitud, latitud]
         return new GeoJsonPoint(
-                location.coordinates()[0], // Longitud
-                location.coordinates()[1]  // Latitud
+                location.coordinates().get(0), // Longitud
+                location.coordinates().get(1)  // Latitud
         );
     }
 
@@ -78,9 +77,7 @@ public interface ReportMapper {
         // Convertimos a [longitud, latitud]
         return new Location(
                 "Point",
-                new Double[] {
-                        geoJsonPoint.getX(), // Longitud
-                        geoJsonPoint.getY() // Latitud
+                new ArrayList<>(Arrays.asList(geoJsonPoint.getX(), geoJsonPoint.getY())) {
                 }
         );
     }

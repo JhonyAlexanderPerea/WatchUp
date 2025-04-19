@@ -54,8 +54,9 @@ dependencies {
 	implementation 'org.modelmapper:modelmapper:3.1.1'
 
 	// MapStruct
-	implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-	annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+	implementation 'org.mapstruct:mapstruct:1.6.3'
+
+	annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
 	// Lombok
 	compileOnly "org.projectlombok:lombok:${lombokVersion}"
