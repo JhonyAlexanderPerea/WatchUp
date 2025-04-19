@@ -3,6 +3,7 @@ package co.uniquindio.service;
 import co.uniquindio.dtos.request.CategoryRequest;
 import co.uniquindio.dtos.response.CategoryResponse;
 import co.uniquindio.dtos.response.PaginatedCategoryResponse;
+import co.uniquindio.mappers.CategoryMapper;
 import co.uniquindio.model.Category;
 import co.uniquindio.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
@@ -15,10 +16,17 @@ import java.util.Optional;
 @Service
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
     public CategoryResponse createCategory(CategoryRequest categoryRequest) {
-        return null;
+        System.out.println(categoryRequest.name());
+        Category category = categoryMapper.parseOf(categoryRequest);
+        System.out.println(category.getName());
+        if(categoryRepository.findByName(category.getName())!=null){
+            throw new RuntimeException("Ya existe una categoria con el nombre: "+category.getName());
+        }
+        return categoryMapper.toResponse(categoryRepository.save(category)) ;
     }
 
     @Override

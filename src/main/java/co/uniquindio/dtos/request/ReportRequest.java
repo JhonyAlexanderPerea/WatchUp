@@ -13,5 +13,4 @@ public record ReportRequest (
         List<String> categories,
         Location location
 ){
-
 }
