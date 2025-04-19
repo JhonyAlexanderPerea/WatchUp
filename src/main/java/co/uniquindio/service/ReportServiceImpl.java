@@ -25,6 +25,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -129,16 +130,35 @@ public class ReportServiceImpl implements ReportService{
     }
 
 
-    //MODIFICAR PARA QUE GUARDE LAS IMAGENES O QUE SE PUEDAN BORRAR O HACER ESA GESTION DE LAS IMAGENS DEL REPORTE
     @Override
-    public Optional<ReportResponse> updateReport(String id, List<MultipartFile>images, ReportRequest reportRequest) {
-        if(reportRepository.existsById(id)){
-            Report report = reportMapper.parseOf(reportRequest, images, categoryService);
-            report.setId(id);
-            return Optional.of(reportMapper.toResponse(reportRepository.save(report)));
-        }else{
-            throw new RuntimeException("No se encontro el reporte con el id: "+id);
+    public Optional<ReportResponse> updateReport(String id, List<MultipartFile>newImages,
+                                                 List<Integer> imagesToDelete,ReportRequest reportRequest,
+                                                 String userId) {
+        Report report = reportRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No se encontro el reporte con el id: " + id));
+        if (!userIdIsValid(userId)) {
+            throw new RuntimeException("El id del usuario no es valido");
         }
+        report.setTitle(reportRequest.title() != null ? reportRequest.title() : report.getTitle());
+        report.setDescription(reportRequest.description() != null ? reportRequest.description() : report.getDescription());
+
+        //Aqui va lo de categorias --> se esta pensando // Valida y convierte IDs a objetos Category
+
+        report.setLocation(reportRequest.location() != null ? reportMapper.locationToGeoJsonPoint(reportRequest.location())
+                : report.getLocation()); // Convierte Location a GeoJsonPoint
+
+        List<byte[]> images = report.getImages();
+        if (imagesToDelete != null) {
+            for (Integer index : imagesToDelete) {
+                images.remove(index.intValue());
+            }
+        }
+        if (newImages != null) {
+            images.addAll(multiPartFileToByte(newImages));
+        }
+
+
+        return Optional.of(reportMapper.toResponse(reportRepository.save(report)));
     }
 
     @Override
@@ -151,5 +171,21 @@ public class ReportServiceImpl implements ReportService{
 
     public static boolean userIdIsValid(String id) {
         return ObjectId.isValid(id);
+    }
+
+    public static List<byte[]> multiPartFileToByte(List<MultipartFile> images) {
+        if (images != null && !images.isEmpty()) {
+            return images.stream()
+                    .map(file -> {
+                        try {
+                            return file.getBytes();
+                        } catch (IOException e) {
+                            throw new RuntimeException("Error al procesar imágenes");
+                        }
+                    })
+                    .toList();
+        }else{
+            throw new RuntimeException("Alguien esta pendejo");
+        }
     }
 }

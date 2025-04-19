@@ -71,11 +71,16 @@ public class ReportController {
         return reportService.changeReportStatus(id, status.newStatus());
     }
 
+
     @PutMapping("/{id}")
     Optional<ReportResponse> updateReport(@PathVariable String id,
-                                          @RequestPart ReportRequest reportRequest,
-                                          @RequestPart List<MultipartFile> imagesPlus){
-        return reportService.updateReport(id, imagesPlus, reportRequest);
+                                          @RequestPart("metadata") ReportRequest reportRequest,
+                                          @RequestPart("newImages") List<MultipartFile> newImages,
+                                          @RequestPart("imagesToDelete")List<Integer> imagesToDelete,
+                                          @AuthenticationPrincipal UserDetails userDetails){
+        User user = ((CustomUserDetails) userDetails).getUser();
+        String userId = user.getId();
+        return reportService.updateReport(id, newImages,imagesToDelete, reportRequest, userId);
     }
 
     @DeleteMapping("/{id}")
