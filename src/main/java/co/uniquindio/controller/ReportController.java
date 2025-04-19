@@ -2,6 +2,7 @@ package co.uniquindio.controller;
 
 
 import co.uniquindio.dtos.common.CustomUserDetails;
+import co.uniquindio.dtos.common.Location;
 import co.uniquindio.dtos.common.ReportChangeStatus;
 import co.uniquindio.dtos.request.ReportRequest;
 import co.uniquindio.dtos.response.PaginatedReportResponse;
@@ -48,12 +49,16 @@ public class ReportController {
     }
 
     @GetMapping
-    PaginatedReportResponse getReports(@RequestParam(required = false)String title, @RequestParam(required = false)String userId,
-                                                 @RequestParam(required = false)String category, @RequestParam(required = false)String status,
-                                                 @RequestParam(required = false)String order,
-                                                 @RequestParam(required = false) @DateTimeFormat(iso= DateTimeFormat.ISO.DATE_TIME) LocalDateTime registerDate,
-                                                 @RequestParam(required = false) @DefaultValue(value = "0") int page ){
-        return reportService.getReports(title,userId,category,status,order,registerDate, page);
+    PaginatedReportResponse getReports(@RequestParam(required = false)String title,
+                                       @RequestParam(required = false)String userId,
+                                       @RequestParam(required = false)String category,
+                                       @RequestParam(required = false)String status,
+                                       @RequestParam(required = false)String order,
+                                       @RequestParam(required = false) @DateTimeFormat(iso= DateTimeFormat.ISO.DATE_TIME) LocalDateTime registerDate,
+                                       @RequestParam(required = false) Location location,
+                                       @RequestParam(required = false) @DefaultValue(value = "0") Integer page ){
+        int pageNumber = (page != null) ? page : 0;
+        return reportService.getReports(title,userId,category,status,order,registerDate,location, pageNumber);
     }
 
     @GetMapping("/{id}")

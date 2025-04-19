@@ -1,5 +1,6 @@
 package co.uniquindio.service;
 
+import co.uniquindio.dtos.common.Location;
 import co.uniquindio.dtos.common.ReportChangeStatus;
 import co.uniquindio.dtos.request.ReportRequest;
 import co.uniquindio.dtos.response.PaginatedReportResponse;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 public interface ReportService {
     ReportResponse createReport(ReportRequest reportRequest, List<MultipartFile>images, String userId);
     PaginatedReportResponse getReports(String title, String userId, String category, String status,
-                                                 String order, LocalDateTime creationDate, int page);
+                                       String order, LocalDateTime creationDate, Location location, int page);
 
     Optional<ReportResponse> getReport(String id);
     Optional<ReportResponse> changeReportStatus(String id, ReportStatus status);
