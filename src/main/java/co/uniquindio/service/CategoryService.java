@@ -10,7 +10,7 @@ import java.util.Optional;
 public interface CategoryService {
     CategoryResponse createCategory(CategoryRequest categoryRequest);
     Optional<CategoryResponse> getCategory(String id);
-    PaginatedCategoryResponse getAllCategories(String order, String name, LocalDate registerDate);
+    PaginatedCategoryResponse getAllCategories(String order, String name,int page);
     void deleteCategory(String id);
     Optional<CategoryResponse> updateCategory(String id, CategoryRequest categoryRequest);
     
