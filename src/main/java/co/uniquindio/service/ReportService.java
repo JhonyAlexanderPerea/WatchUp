@@ -6,6 +6,7 @@ import co.uniquindio.dtos.request.ReportRequest;
 import co.uniquindio.dtos.response.PaginatedReportResponse;
 import co.uniquindio.dtos.response.ReportResponse;
 import co.uniquindio.enums.ReportStatus;
+import co.uniquindio.model.Comment;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
@@ -25,4 +26,8 @@ public interface ReportService {
                                           List<Integer> categoriesToDelete,
                                           ReportRequest reportRequest, String userId);
     void deleteReport(String id);
+
+    void addComment(String reportId, Comment comment);
+    void increaseImport(String reportId, String userId);
+    void increaseIsFake(String reportId, String userId);
 }

@@ -1,8 +1,10 @@
 package co.uniquindio.controller;
 
+import co.uniquindio.dtos.common.CustomUserDetails;
 import co.uniquindio.dtos.request.CommentRequest;
 import co.uniquindio.dtos.response.CommentResponse;
 import co.uniquindio.dtos.response.PaginatedCommentResponse;
+import co.uniquindio.model.User;
 import co.uniquindio.service.CommentService;
 import co.uniquindio.service.CommentServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -25,7 +27,8 @@ public class CommentController {
     @PostMapping
     public ResponseEntity<CommentResponse> createComment(@PathVariable String reportId, @RequestBody CommentRequest commentRequest,
                                                         @AuthenticationPrincipal UserDetails userDetails){
-        String userId = userDetails.getUsername();
+        User user = ((CustomUserDetails) userDetails).getUser();
+        String userId = user.getId();
 
         var commentResponse = commentService.createComment(reportId, commentRequest, userId);
 

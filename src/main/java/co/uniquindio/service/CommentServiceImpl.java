@@ -7,7 +7,9 @@ import co.uniquindio.dtos.response.PaginatedCommentResponse;
 import co.uniquindio.mappers.CommentMapper;
 import co.uniquindio.model.Comment;
 import co.uniquindio.repository.CommentRepository;
+import co.uniquindio.repository.ReportRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

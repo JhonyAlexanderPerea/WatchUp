@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexType;
 import org.springframework.data.mongodb.core.index.GeoSpatialIndexed;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -25,6 +26,7 @@ public class Report {
     @Id
     @EqualsAndHashCode.Include
     private String id;
+    @Indexed
     private ObjectId userId;
     private String title;
     private String description;
@@ -39,5 +41,7 @@ public class Report {
     private List<Comment> comments;
     @GeoSpatialIndexed(type = GeoSpatialIndexType.GEO_2DSPHERE)
     private GeoJsonPoint location;
+    List<String> usersGaveImportant;
+    List<String> usersGaveIsFake;
 
 }

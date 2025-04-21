@@ -28,6 +28,8 @@ public interface ReportMapper {
     @Mapping(target = "images", expression = "java(convertMultipartFilesToBytes(images))")
     @Mapping(target = "location", expression = "java(locationToGeoJsonPoint(reportRequest.location()))")
     @Mapping(target = "categories", expression = "java(mapCategoryNamesToCategories(reportRequest.categories(), categoryService))")
+    @Mapping(target="usersGaveImportant", expression = "java(new java.util.ArrayList<>())")
+    @Mapping(target="usersGaveIsFake", expression = "java(new java.util.ArrayList<>())")
     Report parseOf(ReportRequest reportRequest, List<MultipartFile>images, @Context CategoryService categoryService);
 
 

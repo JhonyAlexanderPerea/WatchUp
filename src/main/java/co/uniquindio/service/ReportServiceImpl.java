@@ -10,6 +10,7 @@ import co.uniquindio.dtos.response.ReportResponse;
 import co.uniquindio.enums.ReportStatus;
 import co.uniquindio.mappers.ReportMapper;
 import co.uniquindio.model.Category;
+import co.uniquindio.model.Comment;
 import co.uniquindio.model.Report;
 import co.uniquindio.model.User;
 import co.uniquindio.repository.ReportRepository;
@@ -148,52 +149,11 @@ public class ReportServiceImpl implements ReportService{
         report.setTitle(reportRequest.title() != null ? reportRequest.title() : report.getTitle());
         report.setDescription(reportRequest.description() != null ? reportRequest.description() : report.getDescription());
 
-        //Aqui va lo de categorias --> se esta pensando // Valida y convierte IDs a objetos Category
-        List<Category> categories = report.getCategories();
-
-        if (categoriesToDelete != null && !categoriesToDelete.isEmpty()) {
-            categoriesToDelete.sort((o1, o2) -> o2.compareTo(o1));
-            for (int index : categoriesToDelete) {
-                if (index <= categories.size()) {
-                    categories.remove(index);
-                }
-            }
-        }
-        if (reportRequest.categories() != null && !reportRequest.categories().isEmpty()) {
-            List<Category> newCategories =reportRequest.categories().stream().map(categoryService::getCategoryByName).toList();
-            for (Category category : newCategories) {
-                if(!categories.isEmpty()) {
-                    for (Category auxCategory : categories) {
-                        if (!(category.getId().equals(auxCategory.getId()))) {
-                            categories.add(category);
-                        }
-                    }
-                }else{categories.addAll(newCategories);}
-            }
-        }
-
         report.setLocation(reportRequest.location() != null ? reportMapper.locationToGeoJsonPoint(reportRequest.location())
                 : report.getLocation()); // Convierte Location a GeoJsonPoint
 
-        List<byte[]> images = report.getImages();
-        if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
-            imagesToDelete.sort((o1, o2) -> o2.compareTo(o1));
-            for (int index : imagesToDelete) {
-                if(index<=images.size()){
-                    images.remove(index);
-                }
-            }
-        }
-        if (newImages != null && !newImages.isEmpty()) {
-            List<byte[]> auxImages = multiPartFileToByte(newImages);
-            for (int i = 0; i < newImages.size(); i++) {
-                if (newImages.get(i)!=null &&!newImages.get(i).isEmpty()) {
-                    images.add(auxImages.get(i));
-                }
-            }
-        }
-        report.setImages(images);
-        report.setCategories(categories);
+        report.setImages(añadirIamgenesNuevas(report, newImages, imagesToDelete));
+        report.setCategories(añadirCategoriasNuevas(report, reportRequest, categoriesToDelete));
         return Optional.of(reportMapper.toResponse(reportRepository.save(report)));
     }
 
@@ -205,6 +165,61 @@ public class ReportServiceImpl implements ReportService{
         reportRepository.save(auxReport);
     }
 
+    @Override
+    public void addComment(String reportId,Comment comment) {
+
+    }
+
+    @Override
+    public void increaseImport(String reportId, String userId) {
+
+        if(reportRepository.findById(reportId).isPresent()){
+            Report report = reportRepository.findById(reportId).get();
+            comprobarUserGaveImportantExist(report);
+            for (String user : report.getUsersGaveImportant()){
+                if(user.equals(userId)){
+                    report.setImportant(report.getImportant()-1);
+                    report.getUsersGaveImportant().remove(user);
+                    reportRepository.save(report);
+                    return;
+                }
+            }
+            report.setImportant(report.getImportant()+1);
+            report.getUsersGaveImportant().add(userId);
+            reportRepository.save(report);
+        }else{
+            throw new RuntimeException("No se encontro el reporte con el id: "+reportId);
+        }
+    }
+
+    @Override
+    public void increaseIsFake(String reportId, String userId) {
+        if(reportRepository.findById(reportId).isPresent()){
+            Report report = reportRepository.findById(reportId).get();
+            confirmarUsersGaveFakeExist(report);
+            for (String user : report.getUsersGaveIsFake()){
+                if(user.equals(userId)){
+                    report.setIsFake(report.getIsFake()-1);
+                    report.getUsersGaveIsFake().remove(user);
+                    reportRepository.save(report);
+                    return;
+                }
+            }
+            report.setIsFake(report.getIsFake()+1);
+            report.getUsersGaveIsFake().add(userId);
+            reportRepository.save(report);
+        }else{
+            throw new RuntimeException("No se encontro el reporte con el id: "+reportId);
+        }
+    }
+
+    public void confirmarUsersGaveFakeExist(Report report){
+        if(report.getUsersGaveIsFake()!=null){
+            return;
+        }else{
+            report.setUsersGaveIsFake(new ArrayList<>());
+        }
+    }
     public static boolean userIdIsValid(String id) {
         return ObjectId.isValid(id);
     }
@@ -224,5 +239,58 @@ public class ReportServiceImpl implements ReportService{
             throw new RuntimeException("Alguien esta pendejo");
         }
     }
+
+    public void comprobarUserGaveImportantExist(Report report){
+        if(report.getUsersGaveImportant()!=null){
+            return;
+        }else{
+            report.setUsersGaveImportant(new ArrayList<>());
+        }
+    }
+
+    public List<Category> añadirCategoriasNuevas(Report report, ReportRequest reportRequest, List<Integer> categoriesToDelete){
+        List<Category> categories = report.getCategories();
+
+        if (categoriesToDelete != null && !categoriesToDelete.isEmpty()) {
+            categoriesToDelete.sort((o1, o2) -> o2.compareTo(o1));
+            for (int index : categoriesToDelete) {
+                if (index <= categories.size()) {
+                    categories.remove(index);
+                }
+            }
+        }
+        if (reportRequest.categories() != null && !reportRequest.categories().isEmpty()) {
+            List<Category> newCategories =reportRequest.categories().stream().map(categoryService::getCategoryByName).toList();
+
+            for (Category category : newCategories) {
+                if (!categories.contains(category)) {
+                    categories.add(category);
+                }
+            }
+        }
+        return categories;
+    }
+
+    public List<byte[]> añadirIamgenesNuevas(Report report, List<MultipartFile>newImages, List<Integer>imagesToDelete){
+        List<byte[]> images = report.getImages();
+        if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
+            imagesToDelete.sort((o1, o2) -> o2.compareTo(o1));
+            for (int index : imagesToDelete) {
+                if(index<=images.size()){
+                    images.remove(index);
+                }
+            }
+        }
+        if (newImages != null && !newImages.isEmpty()) {
+            List<byte[]> auxImages = multiPartFileToByte(newImages);
+            for (int i = 0; i < newImages.size(); i++) {
+                if (newImages.get(i)!=null &&!newImages.get(i).isEmpty()) {
+                    images.add(auxImages.get(i));
+                }
+            }
+        }
+        return  images;
+    }
+
 
 }

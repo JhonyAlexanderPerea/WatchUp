@@ -88,4 +88,18 @@ public class ReportController {
     void deleteReport(@PathVariable String id){
         reportService.deleteReport(id);
     }
+
+    @PatchMapping("/{id}/important")
+    void increaseImportant(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails){
+        User user = ((CustomUserDetails) userDetails).getUser();
+        String userId = user.getId();
+        reportService.increaseImport(id,userId);
+    }
+    @PatchMapping("/{id}/fake")
+    void increaseIsFake(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails){
+        User user = ((CustomUserDetails) userDetails).getUser();
+        String userId = user.getId();
+        reportService.increaseIsFake(id,userId);
+    }
+
 }
