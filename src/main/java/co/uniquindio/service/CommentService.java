@@ -8,10 +8,10 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public interface CommentService {
-    CommentResponse createComment(String reportId, CommentRequest commentRequest, String userId);
-    Optional<CommentResponse> getComment(String id);
+    CommentResponse createComment(CommentRequest commentRequest, String userId);
     void deleteComment(String id);
+    PaginatedCommentResponse getAllComments(String reportId, String userId, LocalDate creationDate, String status, String order, int page);
+    Optional<CommentResponse> getComment(String id);
     Optional<CommentResponse> updateComment(String id, CommentRequest commentRequest);
     Optional<CommentResponse> changeCommentStatus(String id, String status);
-    PaginatedCommentResponse getAllComments(String reportId, String userId, LocalDate creationDate, String status, String order);
 }

@@ -4,11 +4,22 @@ import co.uniquindio.dtos.common.PaginatedContent;
 import co.uniquindio.dtos.request.CommentRequest;
 import co.uniquindio.dtos.response.CommentResponse;
 import co.uniquindio.dtos.response.PaginatedCommentResponse;
+import co.uniquindio.enums.CommentStatus;
+import co.uniquindio.enums.ReportStatus;
 import co.uniquindio.mappers.CommentMapper;
 import co.uniquindio.model.Comment;
+import co.uniquindio.model.Report;
 import co.uniquindio.repository.CommentRepository;
 import co.uniquindio.repository.ReportRepository;
+import co.uniquindio.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.bson.types.ObjectId;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.geo.Point;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
@@ -22,11 +33,18 @@ import java.util.Optional;
 public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final CommentRepository commentRepository;
+    private final ReportRepository reportRepository;
+    private final org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
     @Override
-    public CommentResponse createComment(String reportId, CommentRequest commentRequest, String userId) {
+    public CommentResponse createComment(CommentRequest commentRequest, String userId) {
         Comment comment = commentMapper.parseOf(commentRequest);
-        comment.setReportId(reportId);
+        comment.setReportId(commentRequest.reportId());
         comment.setUserId(userId);
+        Report report =reportRepository.findById(commentRequest.reportId())
+                .orElseThrow(()->new RuntimeException("No se encontro el reporte con el id: "+commentRequest.reportId()));
+        report.getComments().add(comment);
+        reportRepository.save(report);
+
         return commentMapper.toResponse(commentRepository.save(comment));
     }
 
@@ -37,7 +55,10 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public void deleteComment(String id) {
-        commentRepository.deleteById(id);
+        Comment comment = commentRepository.findById(id)
+                .orElseThrow(()->new RuntimeException("No se encontro el comentario con el id: "+id));
+        comment.setStatus(CommentStatus.DELETED);
+        commentRepository.save(comment);
     }
 
     @Override
@@ -51,17 +72,61 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public PaginatedCommentResponse getAllComments(String reportId, String userId, LocalDate creationDate, String status, String order) {
-        List<Comment> comments = commentRepository.findCommentsByReportId(reportId);
+    public PaginatedCommentResponse getAllComments(String reportId, String userId, LocalDate creationDate,
+                                                   String status, String order, int page) {
+
+        Pageable pageable = PageRequest.of(page, 10, parseSort(order)); // 10 items por página
+        org.springframework.data.mongodb.core.query.Query dynamicQuery = new Query().with(pageable);
+
+        // 2. Construir criterios dinámicos
+        Criteria criteria = new Criteria();
+
+        if (reportId != null && !reportId.isEmpty()) {
+            criteria.and("title").regex(reportId, "i"); // Búsqueda case-insensitive
+        }
+
+        if (userId != null && !userId.isEmpty()) {
+            criteria.and("userId").is(new ObjectId(userId));
+        }
+
+        if (status != null && !status.isEmpty()) {
+            try {
+                ReportStatus.valueOf(status.toUpperCase());
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Estado inválido: " + status);
+            }
+            criteria.and("status").is(ReportStatus.valueOf(status.toUpperCase()));
+        }
+
+        if (creationDate != null) {
+            criteria.and("creationDate").gte(creationDate);
+        }
+
+        dynamicQuery.addCriteria(criteria);
+
+        // 4. Ejecutar consulta paginada
+        long total = mongoTemplate.count(dynamicQuery, Comment.class);
+        List<Comment> reports = mongoTemplate.find(dynamicQuery, Comment.class);
+        List<Comment> comments = new ArrayList<>();
+        if(reportId==null || reportId.isEmpty()){
+            comments=commentRepository.findAll();
+        }else{
+            comments= commentRepository.findCommentsByReportId(reportId);
+        }
+
         List<CommentResponse> commentResponses = new ArrayList<>();
         for (Comment comment : comments) {
             commentResponses.add(commentMapper.toResponse(comment));
         }
-        int totalPages = (commentResponses.size()+9)/10;
-        int currentPage = 0;
-        int totalElements = commentResponses.size();
-        int pageSize = 10;
-        PaginatedContent paginatedContent = new PaginatedContent(totalPages, totalElements, currentPage, pageSize);
-        return new PaginatedCommentResponse(commentResponses,paginatedContent);
+        return new PaginatedCommentResponse(commentResponses,
+                new PaginatedContent((int)((total+9)/pageable.getPageSize()),
+                        (int)total,
+                        page,
+                        10));
+    }
+    private Sort parseSort(String order) {
+        if (order == null || order.isEmpty()) return Sort.unsorted();
+        String[] parts = order.split(":");
+        return Sort.by(Sort.Direction.fromString(parts[1]), parts[0]);
     }
 }

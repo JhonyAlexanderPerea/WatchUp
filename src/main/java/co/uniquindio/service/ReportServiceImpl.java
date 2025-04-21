@@ -103,7 +103,6 @@ public class ReportServiceImpl implements ReportService{
         List<Report> reports = mongoTemplate.find(dynamicQuery, Report.class);
 
         // 5. Construir respuesta paginada
-
         return new PaginatedReportResponse(
                 reports.stream().map(reportMapper::toResponse).toList(),
                 new PaginatedContent((int)((total+9)/pageable.getPageSize()),

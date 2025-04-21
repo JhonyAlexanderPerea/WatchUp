@@ -1189,6 +1189,8 @@ components:
     CommentRequest:
       type: object
       properties:
+        reportId:
+          type: string
         comment:
           type: string
           minLength: 1

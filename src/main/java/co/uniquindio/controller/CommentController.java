@@ -19,18 +19,18 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 @RequiredArgsConstructor
-@RequestMapping("/reports/{reportId}/comments")
+@RequestMapping("/comments")
 @RestController
 public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<CommentResponse> createComment(@PathVariable String reportId, @RequestBody CommentRequest commentRequest,
+    public ResponseEntity<CommentResponse> createComment(@RequestBody CommentRequest commentRequest,
                                                         @AuthenticationPrincipal UserDetails userDetails){
         User user = ((CustomUserDetails) userDetails).getUser();
         String userId = user.getId();
 
-        var commentResponse = commentService.createComment(reportId, commentRequest, userId);
+        var commentResponse = commentService.createComment(commentRequest, userId);
 
         URI location = ServletUriComponentsBuilder.
                 fromCurrentRequest().
@@ -42,18 +42,18 @@ public class CommentController {
     }
 
     @GetMapping
-    public PaginatedCommentResponse getAllComments(@PathVariable String reportId,
+    public PaginatedCommentResponse getAllComments(@RequestParam(required = false) String reportId,
                                                                    @RequestParam(required = false) String userId,
                                                                    @RequestParam(required = false) LocalDate creationDate,
                                                                    @RequestParam(required = false) String status,
                                                                    @RequestParam(required = false) String order,
-                                                                   @RequestParam(required = false) int page){
-
-        return commentService.getAllComments(reportId, userId, creationDate, status, order);
+                                                                   @RequestParam(required = false) Integer page){
+        int currentPage = (page != null) ? page : 0;
+        return commentService.getAllComments(reportId, userId, creationDate, status, order,currentPage);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteComment(@PathVariable String id, @PathVariable String reportId){
+    public void deleteComment(@PathVariable String id){
         commentService.deleteComment(id);
     }
 
