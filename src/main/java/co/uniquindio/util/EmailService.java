@@ -1,6 +1,7 @@
 package co.uniquindio.util;
 
 import co.uniquindio.exceptions.ApiExceptions;
+import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,6 +21,26 @@ public class EmailService {
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
+
+    public void sendEmailNotification(String toEmail, String subject, String content) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            helper.setFrom(fromEmail);
+            helper.setTo(toEmail);
+            helper.setSubject(subject);
+            message.addHeader("X-Priority", "1");
+            message.addHeader("X-MSMail-Priority", "High");
+            message.addHeader("Importance", "High");
+            helper.setText(content, true);
+            mailSender.send(message);
+            log.info("Email de restablecimiento de contraseña enviado a: {}", toEmail);
+        }catch (MessagingException e) {
+            log.error("Error enviando email de notificacion", e);
+            throw new ApiExceptions.EmailSendException("Error al enviar el email para notificacion");
+        }
+    }
+
 
     public void sendActivationEmail(String toEmail, String activationCode) {
         try {
