@@ -602,7 +602,7 @@ paths:
         "500":
           description: "Error en el servidor"
 
-  /rerports/{id}/comments:
+  /comments:
     get:
       summary: Obtener los comentarios de un reporte.
       operationId: getCommentsReport
@@ -756,7 +756,7 @@ paths:
         '500':
           description: "Error en el servidor"
 
-  /rerports/{id}/comments/{id}:
+  /comments/{id}:
     delete:
       summary: Eliminar un comentario.
       operationId: deleteComment

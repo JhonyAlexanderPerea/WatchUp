@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -32,6 +33,21 @@ public interface UserRepository extends MongoRepository<User, String> {
             String status,
             Pageable pageable
     );
+
+    @Query("""
+        {
+            "location": {
+                "$near": {
+                    "$geometry": {
+                        "type": "Point",
+                        "coordinates": [?0, ?1]
+                    },
+                    "$maxDistance": ?2
+                }
+            }
+        }
+    """)
+    List<User> findNearUsers(double longitude, double latitude, double maxDistance);
 
     boolean existsByEmail(String email);
 

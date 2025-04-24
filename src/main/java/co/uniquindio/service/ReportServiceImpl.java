@@ -14,6 +14,7 @@ import co.uniquindio.model.Comment;
 import co.uniquindio.model.Report;
 import co.uniquindio.model.User;
 import co.uniquindio.repository.ReportRepository;
+import co.uniquindio.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
@@ -40,6 +41,7 @@ public class ReportServiceImpl implements ReportService{
     private final ReportRepository reportRepository;
     private final ReportMapper reportMapper;
     private final CategoryService categoryService;
+    private final NotificationService notificationService;
     private final org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
 
     @Override
@@ -49,6 +51,7 @@ public class ReportServiceImpl implements ReportService{
         if(!userIdIsValid(userId)){
             throw new RuntimeException("El id del usuario no es valido");
         }
+        notificationService.makeNotifacationToAll(newReport);
         newReport.setUserId(id);
         return  reportMapper.toResponse(reportRepository.save(newReport));
     }
