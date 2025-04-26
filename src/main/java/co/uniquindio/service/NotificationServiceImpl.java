@@ -13,6 +13,7 @@ import co.uniquindio.repository.UserRepository;
 import co.uniquindio.util.EmailService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -22,10 +23,10 @@ import java.util.List;
 @RequiredArgsConstructor
 @Service
 public class NotificationServiceImpl implements NotificationService {
-    NotificationRepository notificationRepository;
-    NotificationMapper notificationMapper;
-    UserRepository userRepository;
-    EmailService emailService;
+    private final NotificationRepository notificationRepository;
+    private final NotificationMapper notificationMapper;
+    private final UserRepository userRepository;
+    private final EmailService emailService;
 
     @Override
     public void makeNotifacationToAll(Report report) {
@@ -34,10 +35,10 @@ public class NotificationServiceImpl implements NotificationService {
                 report.getLocation().getY(),
                 1000 // Radio en metros
         );
-
-        // 2. Crear notificaciones para cada usuario
-        List<Notification> notifications = new ArrayList<>();
-        for (User user : usersNearby) {
+        if (usersNearby != null && !usersNearby.isEmpty()) {
+            // 2. Crear notificaciones para cada usuario
+            List<Notification> notifications = new ArrayList<>();
+            for (User user : usersNearby) {
                 notifications.add(Notification.builder()
                         .userId(user.getId())
                         .reportId(report.getId())
@@ -45,10 +46,10 @@ public class NotificationServiceImpl implements NotificationService {
                         .creationDate(LocalDateTime.now())
                         .build());
                 try {
-                    emailService.enviarNotificacionReporte(user.getFullName(),
+                    emailService.enviarNotificacionReporte(user.getEmail(),
                             report.getCategories().getFirst().getName(),
-                            report.getId(),
-                            LocalDateTime.now().toString(),
+                            report.getTitle(),
+                            LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-d|HH:mm:ss")),
                             report.getDescription(),
                             "http://localhost/reports/" + report.getId()
                     );
@@ -56,14 +57,17 @@ public class NotificationServiceImpl implements NotificationService {
                     throw new RuntimeException("Error al enviar notificacion al usuario: " + user.getFullName());
                 }
 
-        }
-        int totalPages = (notifications.size() + 9) / 10;
-        int totalItems = notifications.size();
-        notificationRepository.saveAll(notifications);
+            }
+            int totalPages = (notifications.size() + 9) / 10;
+            int totalItems = notifications.size();
+            notificationRepository.saveAll(notifications);
 
-        //ESTO POR SI EN ALGUN MOMENTO SE DESEA VER LAS NOTIFICACIONES HECHAS
-        PaginatedNotificationResponse  paginatedNotificationResponse= new PaginatedNotificationResponse(notificationMapper.toResponse(notifications),
-                new PaginatedContent(totalPages, totalItems, 1, 10));
+            //ESTO POR SI EN ALGUN MOMENTO SE DESEA VER LAS NOTIFICACIONES HECHAS
+            PaginatedNotificationResponse paginatedNotificationResponse = new PaginatedNotificationResponse(notificationMapper.toResponse(notifications),
+                    new PaginatedContent(totalPages, totalItems, 1, 10));
+        } else {
+            System.out.println("NO SE ENCONTRO NINGUN USUARIO NEARBY PARA LA REPORTE: " + report.getId());
+        }
     }
 
     @Override

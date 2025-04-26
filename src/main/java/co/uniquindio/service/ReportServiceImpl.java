@@ -46,14 +46,19 @@ public class ReportServiceImpl implements ReportService{
 
     @Override
     public ReportResponse createReport(ReportRequest reportRequest, List<MultipartFile>images, String userId) {
-        Report newReport = reportMapper.parseOf(reportRequest, images, categoryService);
-        ObjectId id = new ObjectId(userId);
-        if(!userIdIsValid(userId)){
-            throw new RuntimeException("El id del usuario no es valido");
+        if(reportRequestIsValid(reportRequest) && images!=null && !images.isEmpty()){
+            Report newReport = reportMapper.parseOf(reportRequest, images, categoryService);
+            ObjectId id = new ObjectId(userId);
+            if(!userIdIsValid(userId)){
+                throw new RuntimeException("El id del usuario no es valido");
+            }
+            notificationService.makeNotifacationToAll(newReport);
+            newReport.setUserId(id);
+            return  reportMapper.toResponse(reportRepository.save(newReport));
+        }else{
+            throw new RuntimeException("Algun campo del reporte no es valido, revise los campos y vuelva a intentarlo");
         }
-        notificationService.makeNotifacationToAll(newReport);
-        newReport.setUserId(id);
-        return  reportMapper.toResponse(reportRepository.save(newReport));
+
     }
 
     @Override
@@ -294,5 +299,10 @@ public class ReportServiceImpl implements ReportService{
         return  images;
     }
 
-
+    public boolean reportRequestIsValid(ReportRequest reportRequest){
+        return reportRequest.title()!=null && !reportRequest.title().isEmpty()
+                && reportRequest.description()!=null && !reportRequest.description().isEmpty()
+                && reportRequest.location()!=null
+                && reportRequest.categories() != null && !reportRequest.categories().isEmpty();
+    }
 }

@@ -4,6 +4,7 @@ import co.uniquindio.dtos.common.Location;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -34,34 +35,57 @@ public class LocationService {
         private String country;
     }
 
-    public Location getCurrentLocation() {
-        try {
-            // Usar servicio gratuito de geolocalización por IP
-            IpApiResponse response = restTemplate.getForObject(
-                    "https://ipapi.co/json/",
-                    IpApiResponse.class
-            );
+//    public Location getCurrentLocation() {
+//        try {
+//            // Usar servicio gratuito de geolocalización por IP
+//            IpApiResponse response = restTemplate.getForObject(
+//                    "https://ipapi.co/json/",
+//                    IpApiResponse.class
+//            );
+//
+//            if (response != null) {
+//                return Location.builder()
+//                        .type("Point")
+//                        .coordinates(List.of(
+//                                Double.parseDouble(response.getLongitude()),
+//                                Double.parseDouble(response.getLatitude())
+//                        ))
+//                        .build();
+//            }
+//        } catch (Exception e) {
+//            log.error("Error al obtener la ubicación por IP: {}", e.getMessage());
+//        }
+//
+//        return getDefaultLocation();
+//    }
+public GeoJsonPoint getCurrentLocation() {
+    try {
+        // Usar servicio gratuito de geolocalización por IP
+        IpApiResponse response = restTemplate.getForObject(
+                "https://ipapi.co/json/",
+                IpApiResponse.class
+        );
 
-            if (response != null) {
-                return Location.builder()
-                        .type("Point")
-                        .coordinates(List.of(
-                                Double.parseDouble(response.getLongitude()),
-                                Double.parseDouble(response.getLatitude())
-                        ))
-                        .build();
-            }
-        } catch (Exception e) {
-            log.error("Error al obtener la ubicación por IP: {}", e.getMessage());
+        if (response != null) {
+            return new GeoJsonPoint(Double.parseDouble(response.getLongitude()),
+                                    Double.parseDouble(response.getLatitude()));
         }
-
-        return getDefaultLocation();
+    } catch (Exception e) {
+        log.error("Error al obtener la ubicación por IP: {}", e.getMessage());
     }
 
-    private Location getDefaultLocation() {
-        return Location.builder()
-                .type("Point")
-                .coordinates(List.of(defaultLongitude, defaultLatitude))
-                .build();
+    return getDefaultLocation();
+}
+
+//    private Location getDefaultLocation() {
+//        return Location.builder()
+//                .type("Point")
+//                .coordinates(List.of(defaultLongitude, defaultLatitude))
+//                .build();
+//    }
+    private GeoJsonPoint getDefaultLocation() {
+        return new GeoJsonPoint(defaultLongitude,
+                                defaultLatitude);
+
     }
 }
