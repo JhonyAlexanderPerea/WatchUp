@@ -2,6 +2,7 @@ package co.uniquindio.model;
 
 import lombok.*;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ public class ReportHistory {
     @EqualsAndHashCode.Include
     @Id
     private String id;
+    @Indexed
     private String reportId;
     private String description;
     private LocalDateTime registerDate;
