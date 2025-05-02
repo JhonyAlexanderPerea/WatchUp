@@ -2,6 +2,7 @@ package co.uniquindio.util;
 
 import co.uniquindio.dtos.request.*;
 import co.uniquindio.dtos.response.LoginResponse;
+import co.uniquindio.dtos.response.TokenResponse;
 import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.enums.UserStatus;
 import co.uniquindio.exceptions.ApiExceptions;
@@ -9,45 +10,61 @@ import co.uniquindio.model.User;
 import co.uniquindio.repository.PasswordResetTokenRepository;
 import co.uniquindio.repository.UserRepository;
 import co.uniquindio.mappers.UserMapper;
+import co.uniquindio.security.JwtTokenProvider;
 import co.uniquindio.serviceImpl.PasswordResetTokenServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.Random;
 
-@Service
+@Service("securityService")
 @Slf4j
 @RequiredArgsConstructor
 public class AuthenticationService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final JwtService jwtService;
     private final UserMapper userMapper;
     private final EmailService emailService;
     private final PasswordResetTokenServiceImpl passwordResetTokenService;
     private final PasswordResetTokenRepository resetTokenRepository;
 
-    public LoginResponse login(AuthenticationRequest request) {
-        User user = userRepository.findUserByEmail(request.email())
-                .orElseThrow(() -> new ApiExceptions.InvalidCredentialsException("Credenciales inválidas"));
+    private final AuthenticationManager authenticationManager;
+    private final JwtTokenProvider jwtTokenProvider;
+    private final long expiry = 15;
 
-        if (!user.getStatus().equals(UserStatus.ACTIVE)) {
-            throw new ApiExceptions.AccountNotActivatedException("La cuenta no está activada");
-        }
 
-        if (!passwordEncoder.matches(request.password(), user.getPassword())) {
-            throw new ApiExceptions.InvalidCredentialsException("Credenciales inválidas");
-        }
+    public TokenResponse login(LoginRequest request) {
+        final var authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.email(), request.password())
+        );
+        final var roles = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority).toList();
+        final var now = Instant.now();
+        final var expire = now.plus(expiry, ChronoUnit.MINUTES);
+        return new TokenResponse(
+                jwtTokenProvider.generateTokenAsString(
+                        authentication.getName(),roles,now,expire),
+                "Bearer",expire,roles);
 
-        String token = jwtService.generateToken(user);
-        UserResponse userResponse = userMapper.userToUserResponse(user);
+    }
+    public boolean isCurrentUser(String id) {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        return userRepository.findById(id)
+                .map(user -> user.getEmail().equals(username))
+                .orElse(false);
 
-        return new LoginResponse(token, "Bearer", userResponse);
     }
 
     public UserResponse register(RegisterRequest request) {
@@ -142,12 +159,4 @@ public class AuthenticationService {
         return String.format("%06d", new Random().nextInt(999999));
     }
 
-    public boolean isCurrentUser(String id) {
-        String username = SecurityContextHolder.getContext()
-                .getAuthentication().getName();
-        return userRepository.findById(id)
-                .map(user -> user.getEmail().equals(username))
-                .orElse(false);
-
-    }
 }

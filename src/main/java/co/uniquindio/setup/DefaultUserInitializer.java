@@ -27,10 +27,10 @@ public class DefaultUserInitializer implements CommandLineRunner {
     private User createUser(DefaultUserProperties.DefaultUser defaultUser){
         return  User.builder()
                 .id( UUID.randomUUID().toString())
-                .address(defaultUser.email())
+                .email(defaultUser.name())
                 .role(defaultUser.role())
                 .fullName(defaultUser.name())
-                .password(defaultUser.password())
+                .password(passwordEncoder.encode(defaultUser.password()))
                 .build();
 
     }

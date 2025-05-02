@@ -10,7 +10,9 @@ import org.springframework.stereotype.Component;
 @Getter
 public class PublicEndPoints {
     private final RequestMatcher[] matchers = new RequestMatcher[] {
-            new AntPathRequestMatcher("/auth/**"),
+            new AntPathRequestMatcher("/auth/**", HttpMethod.POST.name()),
+            new AntPathRequestMatcher("/auth/login", HttpMethod.POST.name()),
+            new AntPathRequestMatcher("/auth/register", HttpMethod.POST.name()),
             new AntPathRequestMatcher("/reports", HttpMethod.GET.name()),
             new AntPathRequestMatcher("/reports/*", HttpMethod.GET.name()),
             new AntPathRequestMatcher("/categories", HttpMethod.GET.name()),

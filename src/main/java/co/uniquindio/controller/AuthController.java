@@ -1,22 +1,15 @@
 package co.uniquindio.controller;
 
 import co.uniquindio.dtos.request.AccountActivationRequest;
-import co.uniquindio.dtos.request.AuthenticationRequest;
 import co.uniquindio.dtos.request.LoginRequest;
 import co.uniquindio.dtos.request.RegisterRequest;
-import co.uniquindio.dtos.response.LoginResponse;
 import co.uniquindio.dtos.response.TokenResponse;
 import co.uniquindio.dtos.response.UserResponse;
-import co.uniquindio.security.SecurityConfig;
-import co.uniquindio.service.SecurityService;
-import co.uniquindio.service.UserService;
 import co.uniquindio.util.AuthenticationService;
-import co.uniquindio.util.EmailService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
@@ -25,14 +18,12 @@ import java.util.Optional;
 public class AuthController {
 
     private final AuthenticationService authService;
-    private final EmailService emailService;
-    private final SecurityService securityService;
 
     @PostMapping("/login")
     public ResponseEntity<TokenResponse> login(
             @Valid @RequestBody LoginRequest loginRequest
     ) {
-        return ResponseEntity.ok(securityService.login(loginRequest));
+        return ResponseEntity.ok(authService.login(loginRequest));
     }
 
     @PostMapping("/register")
