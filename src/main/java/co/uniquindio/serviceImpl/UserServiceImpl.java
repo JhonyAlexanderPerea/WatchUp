@@ -273,7 +273,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void activateAccount(AccountActivationRequest request) {
-        User user = userRepository.findByEmail(request.email())
+        User user = userRepository.findUserByEmail(request.email())
                 .orElseThrow(() -> new ApiExceptions.NotFoundException("Usuario no encontrado"));
 
         if (user.getStatus().equals(UserStatus.ACTIVE)) {

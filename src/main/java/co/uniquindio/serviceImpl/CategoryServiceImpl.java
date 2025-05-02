@@ -1,4 +1,4 @@
-package co.uniquindio.service;
+package co.uniquindio.serviceImpl;
 
 import co.uniquindio.dtos.common.PaginatedContent;
 import co.uniquindio.dtos.request.CategoryRequest;
@@ -7,13 +7,13 @@ import co.uniquindio.dtos.response.PaginatedCategoryResponse;
 import co.uniquindio.mappers.CategoryMapper;
 import co.uniquindio.model.Category;
 import co.uniquindio.repository.CategoryRepository;
+import co.uniquindio.service.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;

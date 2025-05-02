@@ -1,4 +1,4 @@
-package co.uniquindio.service;
+package co.uniquindio.serviceImpl;
 
 import co.uniquindio.dtos.common.PaginatedContent;
 import co.uniquindio.dtos.request.CommentRequest;
@@ -11,16 +11,14 @@ import co.uniquindio.model.Comment;
 import co.uniquindio.model.Report;
 import co.uniquindio.repository.CommentRepository;
 import co.uniquindio.repository.ReportRepository;
-import co.uniquindio.repository.UserRepository;
+import co.uniquindio.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;

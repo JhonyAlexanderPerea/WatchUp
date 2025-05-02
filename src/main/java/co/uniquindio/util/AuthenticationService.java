@@ -9,8 +9,10 @@ import co.uniquindio.model.User;
 import co.uniquindio.repository.PasswordResetTokenRepository;
 import co.uniquindio.repository.UserRepository;
 import co.uniquindio.mappers.UserMapper;
+import co.uniquindio.serviceImpl.PasswordResetTokenServiceImpl;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -31,7 +33,7 @@ public class AuthenticationService {
     private final PasswordResetTokenRepository resetTokenRepository;
 
     public LoginResponse login(AuthenticationRequest request) {
-        User user = userRepository.findByEmail(request.email())
+        User user = userRepository.findUserByEmail(request.email())
                 .orElseThrow(() -> new ApiExceptions.InvalidCredentialsException("Credenciales inválidas"));
 
         if (!user.getStatus().equals(UserStatus.ACTIVE)) {
@@ -76,7 +78,7 @@ public class AuthenticationService {
     }
 
     public void activateAccount(AccountActivationRequest request) {
-        User user = userRepository.findByEmail(request.email())
+        User user = userRepository.findUserByEmail(request.email())
                 .orElseThrow(() -> new ApiExceptions.NotFoundException("Usuario no encontrado"));
 
         if (user.getStatus().equals(UserStatus.ACTIVE)) {
@@ -98,7 +100,7 @@ public class AuthenticationService {
     }
 
     public void resendActivation(String email) {
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new ApiExceptions.NotFoundException("Usuario no encontrado"));
 
         if (user.getStatus().equals(UserStatus.ACTIVE)) {
@@ -138,5 +140,14 @@ public class AuthenticationService {
     }
     private String generateCode() {
         return String.format("%06d", new Random().nextInt(999999));
+    }
+
+    public boolean isCurrentUser(String id) {
+        String username = SecurityContextHolder.getContext()
+                .getAuthentication().getName();
+        return userRepository.findById(id)
+                .map(user -> user.getEmail().equals(username))
+                .orElse(false);
+
     }
 }

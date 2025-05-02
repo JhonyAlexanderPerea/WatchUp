@@ -1,9 +1,8 @@
-package co.uniquindio.service;
+package co.uniquindio.serviceImpl;
 
 
 import co.uniquindio.dtos.common.Location;
 import co.uniquindio.dtos.common.PaginatedContent;
-import co.uniquindio.dtos.common.ReportChangeStatus;
 import co.uniquindio.dtos.request.ReportRequest;
 import co.uniquindio.dtos.response.PaginatedReportResponse;
 import co.uniquindio.dtos.response.ReportResponse;
@@ -11,30 +10,29 @@ import co.uniquindio.enums.ReportStatus;
 import co.uniquindio.mappers.ReportMapper;
 import co.uniquindio.model.*;
 import co.uniquindio.repository.ReportRepository;
-import co.uniquindio.repository.UserRepository;
+import co.uniquindio.service.CategoryService;
+import co.uniquindio.service.NotificationService;
+import co.uniquindio.service.ReportHistoryService;
+import co.uniquindio.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
-import org.springframework.boot.autoconfigure.data.web.SpringDataWebProperties;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 @RequiredArgsConstructor
 @Service
-public class ReportServiceImpl implements ReportService{
+public class ReportServiceImpl implements ReportService {
     private final ReportRepository reportRepository;
     private final ReportMapper reportMapper;
     private final ReportHistoryService reportHistoryService;

@@ -6,7 +6,6 @@ import co.uniquindio.dtos.response.CommentResponse;
 import co.uniquindio.dtos.response.PaginatedCommentResponse;
 import co.uniquindio.model.User;
 import co.uniquindio.service.CommentService;
-import co.uniquindio.service.CommentServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -16,7 +15,6 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.time.LocalDate;
-import java.util.Optional;
 
 @RequiredArgsConstructor
 @RequestMapping("/comments")

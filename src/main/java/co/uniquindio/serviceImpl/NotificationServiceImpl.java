@@ -1,4 +1,4 @@
-package co.uniquindio.service;
+package co.uniquindio.serviceImpl;
 
 import co.uniquindio.dtos.common.PaginatedContent;
 import co.uniquindio.dtos.response.NotificationResponse;
@@ -10,10 +10,10 @@ import co.uniquindio.model.Report;
 import co.uniquindio.model.User;
 import co.uniquindio.repository.NotificationRepository;
 import co.uniquindio.repository.UserRepository;
+import co.uniquindio.service.NotificationService;
 import co.uniquindio.util.EmailService;
 import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

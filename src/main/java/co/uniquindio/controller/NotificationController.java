@@ -4,12 +4,11 @@ import co.uniquindio.dtos.common.CustomUserDetails;
 import co.uniquindio.dtos.response.NotificationResponse;
 import co.uniquindio.dtos.response.PaginatedNotificationResponse;
 import co.uniquindio.model.User;
-import co.uniquindio.service.NotificationServiceImpl;
+import co.uniquindio.serviceImpl.NotificationServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.function.EntityResponse;
 
 import java.util.Optional;
 

@@ -7,9 +7,11 @@ import co.uniquindio.dtos.request.UserUpdateRequest;
 import co.uniquindio.dtos.response.PaginatedUserResponse;
 import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.mappers.UserMapper;
+import co.uniquindio.service.SecurityService;
 import co.uniquindio.service.UserService;
 import co.uniquindio.util.AuthenticationService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,13 +22,11 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
     private final AuthenticationService authService;
-    public UserController(UserService userService, AuthenticationService authService) {
-        this.userService = userService;
-        this.authService = authService;
-    }
+
 
     @GetMapping
     public Optional<PaginatedUserResponse> getUsers(

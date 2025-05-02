@@ -9,11 +9,13 @@ import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.enums.Role;
 import co.uniquindio.enums.UserStatus;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.time.LocalDate;
 import java.util.Optional;
 
 public interface UserService {
+    @PreAuthorize("hasAuthority('ADMIN')")
     Optional<PaginatedUserResponse> getUsers(
             String fullName,
             String email,
@@ -28,12 +30,16 @@ public interface UserService {
 
     boolean existsByEmail(String email);
 
+    @PreAuthorize("hasAuthority('ADMIN') or @securityService.isCurrentUser(#id)")
     Optional<UserResponse> getUserById(String id);
 
+    @PreAuthorize("hasAuthority('ADMIN') or @securityService.isCurrentUser(#id)")
     Optional<Void> updatePassword(String id, PasswordUpdateRequest request);
 
+    @PreAuthorize("hasAuthority('ADMIN') or @securityService.isCurrentUser(#id)")
     Optional <UserResponse> updateUser(String id, UserUpdateRequest request);
 
+    @PreAuthorize("hasAuthority('ADMIN') or @securityService.isCurrentUser(#id)")
     void deleteUser(String id);
 
     void activateAccount(AccountActivationRequest request);

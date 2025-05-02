@@ -1,10 +1,11 @@
-package co.uniquindio.service;
+package co.uniquindio.serviceImpl;
 
 import co.uniquindio.dtos.common.PaginatedContent;
 import co.uniquindio.dtos.response.PaginatedReportHistoriesResponse;
 import co.uniquindio.dtos.response.ReportHistoryResponse;
 import co.uniquindio.model.ReportHistory;
 import co.uniquindio.repository.ReportHistoryRepository;
+import co.uniquindio.service.ReportHistoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

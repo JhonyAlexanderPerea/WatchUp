@@ -2,9 +2,14 @@ package co.uniquindio.controller;
 
 import co.uniquindio.dtos.request.AccountActivationRequest;
 import co.uniquindio.dtos.request.AuthenticationRequest;
+import co.uniquindio.dtos.request.LoginRequest;
 import co.uniquindio.dtos.request.RegisterRequest;
 import co.uniquindio.dtos.response.LoginResponse;
+import co.uniquindio.dtos.response.TokenResponse;
 import co.uniquindio.dtos.response.UserResponse;
+import co.uniquindio.security.SecurityConfig;
+import co.uniquindio.service.SecurityService;
+import co.uniquindio.service.UserService;
 import co.uniquindio.util.AuthenticationService;
 import co.uniquindio.util.EmailService;
 import jakarta.validation.Valid;
@@ -21,12 +26,13 @@ public class AuthController {
 
     private final AuthenticationService authService;
     private final EmailService emailService;
+    private final SecurityService securityService;
 
     @PostMapping("/login")
-    public Optional<ResponseEntity<LoginResponse>> login(
-            @Valid @RequestBody AuthenticationRequest request
+    public ResponseEntity<TokenResponse> login(
+            @Valid @RequestBody LoginRequest loginRequest
     ) {
-        return Optional.of(ResponseEntity.ok(authService.login(request)));
+        return ResponseEntity.ok(securityService.login(loginRequest));
     }
 
     @PostMapping("/register")

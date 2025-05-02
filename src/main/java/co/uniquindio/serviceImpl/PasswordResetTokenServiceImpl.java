@@ -1,4 +1,4 @@
-package co.uniquindio.util;
+package co.uniquindio.serviceImpl;
 
 
 import co.uniquindio.mappers.UserMapper;
@@ -7,6 +7,8 @@ import co.uniquindio.model.User;
 import co.uniquindio.repository.PasswordResetTokenRepository;
 import co.uniquindio.repository.UserRepository;
 import co.uniquindio.exceptions.ApiExceptions;
+import co.uniquindio.service.PasswordResetTokenService;
+import co.uniquindio.util.PasswordResetToken;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,7 +26,7 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
     @Override
     // ✅ Generar un código de restablecimiento y guardarlo en la base de datos
     public String generateAndSavePasswordResetToken(String email) {
-        User user = userRepository.findByEmail(email)
+        User user = userRepository.findUserByEmail(email)
                 .orElseThrow(() -> new ApiExceptions.NotFoundException("Usuario no encontrado"));
 
         String resetCode = UUID.randomUUID().toString();
@@ -49,7 +51,7 @@ public class PasswordResetTokenServiceImpl implements PasswordResetTokenService 
             throw new ApiExceptions.InvalidOperationException("El código de restablecimiento ha expirado");
         }
 
-        return userRepository.findByEmail(token.getUserEmail())
+        return userRepository.findUserByEmail(token.getUserEmail())
                 .orElseThrow(() -> new ApiExceptions.NotFoundException("Usuario no encontrado"));
     }
 
