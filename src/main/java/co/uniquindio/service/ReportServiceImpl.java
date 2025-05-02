@@ -9,10 +9,7 @@ import co.uniquindio.dtos.response.PaginatedReportResponse;
 import co.uniquindio.dtos.response.ReportResponse;
 import co.uniquindio.enums.ReportStatus;
 import co.uniquindio.mappers.ReportMapper;
-import co.uniquindio.model.Category;
-import co.uniquindio.model.Comment;
-import co.uniquindio.model.Report;
-import co.uniquindio.model.User;
+import co.uniquindio.model.*;
 import co.uniquindio.repository.ReportRepository;
 import co.uniquindio.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +37,7 @@ import java.util.Optional;
 public class ReportServiceImpl implements ReportService{
     private final ReportRepository reportRepository;
     private final ReportMapper reportMapper;
+    private final ReportHistoryService reportHistoryService;
     private final CategoryService categoryService;
     private final NotificationService notificationService;
     private final org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
@@ -54,6 +52,9 @@ public class ReportServiceImpl implements ReportService{
             }
             notificationService.makeNotifacationToAll(newReport);
             newReport.setUserId(id);
+            reportHistoryService.saveReportHistory(newReport.getId(), userId,"CREATION",
+                    "El usuario con el id :"+userId+" creo el reporte con el id : "+newReport.getId()
+            +". En la fecha : "+newReport.getCreationDate().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-d|HH:mm:ss")));
             return  reportMapper.toResponse(reportRepository.save(newReport));
         }else{
             throw new RuntimeException("Algun campo del reporte no es valido, revise los campos y vuelva a intentarlo");
@@ -133,10 +134,15 @@ public class ReportServiceImpl implements ReportService{
     }
 
     @Override
-    public Optional<ReportResponse> changeReportStatus(String id, ReportStatus status) {
+    public Optional<ReportResponse> changeReportStatus(String id, ReportStatus status, String userId) {
         Report report = reportRepository.findById(id).orElseThrow(()->new RuntimeException("No se encontro el reporte con el id: "+id));
         report.setStatus(status);
         reportRepository.save(report);
+
+        reportHistoryService.saveReportHistory(report.getId(), userId,"CHANGE_STATUS",
+                "El usuario con el id :"+userId+" cambio el estado del reporte con el id : "+report.getId()
+                        +". Al estado de :"+status
+                        +". En la fecha : "+LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-d|HH:mm:ss")));
         return Optional.of(reportMapper.toResponse(report));
     }
 
@@ -153,22 +159,61 @@ public class ReportServiceImpl implements ReportService{
         if (!userIdIsValid(userId)) {
             throw new RuntimeException("El id del usuario no es valido");
         }
-        report.setTitle(reportRequest.title() != null ? reportRequest.title() : report.getTitle());
-        report.setDescription(reportRequest.description() != null ? reportRequest.description() : report.getDescription());
+        report.setTitle(reportRequest.title()!=null ? reportRequest.title() : report.getTitle());
 
-        report.setLocation(reportRequest.location() != null ? reportMapper.locationToGeoJsonPoint(reportRequest.location())
-                : report.getLocation()); // Convierte Location a GeoJsonPoint
+        report.setDescription(reportRequest.description()!=null ? reportRequest.description() : report.getDescription());
+
+        report.setLocation(reportRequest.location()!=null ? reportMapper.locationToGeoJsonPoint(reportRequest.location()) : report.getLocation());
 
         report.setImages(añadirIamgenesNuevas(report, newImages, imagesToDelete));
         report.setCategories(añadirCategoriasNuevas(report, reportRequest, categoriesToDelete));
+
+        reportHistoryService.saveReportHistory(report.getId(), userId,"MODIFY",
+                mensajeUpdateHistorial(report,newImages,imagesToDelete,categoriesToDelete,reportRequest,userId));
+
         return Optional.of(reportMapper.toResponse(reportRepository.save(report)));
     }
 
+    public String mensajeUpdateHistorial(Report report, List<MultipartFile>newImages,
+                                         List<Integer> imagesToDelete,
+                                         List<Integer>categoriesToDelete, ReportRequest reportRequest,
+                                         String userId){
+        String mensajeHistoria = "El usuario con el id :"+userId+" modifico el reporte con el id : "+report.getId();
+        if(reportRequest.title() != null){
+            mensajeHistoria+=", se cambio el titulo por : "+reportRequest.title();
+        }
+        if (reportRequest.description() != null){
+            report.setDescription(reportRequest.description());
+            mensajeHistoria+=", se cambio el descripcion por : "+reportRequest.description();
+        }
+        if(reportRequest.location()!=null){
+            report.setLocation(reportMapper.locationToGeoJsonPoint(reportRequest.location()));
+            mensajeHistoria+=", se cambio el location por : "+reportRequest.location().coordinates().toString();
+        }
+        if(newImages!=null && !newImages.isEmpty()){
+            mensajeHistoria+=", se agregaron "+newImages.size()+" imagenes";
+        }
+        if(reportRequest.categories()!=null && !reportRequest.categories().isEmpty()){
+            mensajeHistoria+=", se agregaron "+reportRequest.categories().size()+" categorias";
+        }
+        if(imagesToDelete!=null && !imagesToDelete.isEmpty()){
+            mensajeHistoria+=", se eliminaron "+imagesToDelete.size()+" imagenes";
+        }
+        if(categoriesToDelete!=null && !categoriesToDelete.isEmpty()){
+            mensajeHistoria+=", se eliminaron "+categoriesToDelete.size()+" categorias";
+        }
+        mensajeHistoria+=". \nEn la fecha : "+LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-d|HH:mm:ss"));
+        return mensajeHistoria;
+    }
+
     @Override
-    public void deleteReport(String id) {
+    public void deleteReport(String id, String userId) {
         Report auxReport = reportRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se encontro el reporte con el id: " + id));
         auxReport.setStatus(ReportStatus.DELETED);
+        reportHistoryService.saveReportHistory(id, userId, "DELETE",
+                "El usuario con el id :"+userId+" elimino el reporte con el id : "+id
+                        +". En la fecha : "+LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-d|HH:mm:ss")));
         reportRepository.save(auxReport);
     }
 

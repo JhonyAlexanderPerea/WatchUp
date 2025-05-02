@@ -21,7 +21,7 @@ public class ReportHistory {
     @Indexed
     private String reportId;
     private String description;
-    private LocalDateTime registerDate;
+    private LocalDateTime modifiedDate;
     private String action;
     private String modifiedBy;
 }

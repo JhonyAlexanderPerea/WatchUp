@@ -9,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +48,21 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
         int totalPages = (reportHistories.size() + 9) / 10;
         int totalItems = reportHistories.size();
 
-        reportHistories = reportHistories.subList(page*10,((page+1)*10)-1);
+        //esto es para hacer la paginacion manual en vez por el Pageable del repositorio
+        if(page < totalPages && page*10<totalItems){
+            if(((page+1)*10)-1>=totalItems){
+                reportHistories = reportHistories.subList(page*10,totalItems);
+            }else {
+                reportHistories = reportHistories.subList(page * 10, ((page + 1) * 10) - 1);
+            }
+        }else{
+            if(10<=totalPages){
+                reportHistories = reportHistories.subList(0,10);
+            }else{reportHistories = reportHistories.subList(0,totalItems);}
+            if(totalPages==0){
+                reportHistories=null;
+            }
+        }
 
         return new PaginatedReportHistoriesResponse(reportHistories,
                 new PaginatedContent(totalPages, totalItems, page, 10));

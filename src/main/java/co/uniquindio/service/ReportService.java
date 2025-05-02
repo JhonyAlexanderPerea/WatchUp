@@ -20,12 +20,12 @@ public interface ReportService {
                                        String order, LocalDateTime creationDate, Location location, int page);
 
     Optional<ReportResponse> getReport(String id);
-    Optional<ReportResponse> changeReportStatus(String id, ReportStatus status);
+    Optional<ReportResponse> changeReportStatus(String id, ReportStatus status, String userId);
     Optional<ReportResponse> updateReport(String id, List<MultipartFile> newImages,
                                           List<Integer>imagesToDelete,
                                           List<Integer> categoriesToDelete,
                                           ReportRequest reportRequest, String userId);
-    void deleteReport(String id);
+    void deleteReport(String id, String userId);
 
     void addComment(String reportId, Comment comment);
     void increaseImport(String reportId, String userId);

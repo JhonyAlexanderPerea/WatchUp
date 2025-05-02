@@ -67,8 +67,12 @@ public class ReportController {
     }
 
     @PatchMapping("/{id}")
-    Optional<ReportResponse> changeReportStatus(@PathVariable String id, @RequestBody ReportChangeStatus status){
-        return reportService.changeReportStatus(id, status.newStatus());
+    Optional<ReportResponse> changeReportStatus(@PathVariable String id,
+                                                @RequestBody ReportChangeStatus status,
+                                                @AuthenticationPrincipal UserDetails userDetails){
+        User user = ((CustomUserDetails) userDetails).getUser();
+        String userId = user.getId();
+        return reportService.changeReportStatus(id, status.newStatus(), userId);
     }
 
 
@@ -85,8 +89,11 @@ public class ReportController {
     }
 
     @DeleteMapping("/{id}")
-    void deleteReport(@PathVariable String id){
-        reportService.deleteReport(id);
+    void deleteReport(@PathVariable String id,
+                      @AuthenticationPrincipal UserDetails userDetails){
+        User user = ((CustomUserDetails) userDetails).getUser();
+        String userId = user.getId();
+        reportService.deleteReport(id, userId);
     }
 
     @PatchMapping("/{id}/important")
