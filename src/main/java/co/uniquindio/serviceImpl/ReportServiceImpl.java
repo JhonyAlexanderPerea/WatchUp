@@ -7,9 +7,11 @@ import co.uniquindio.dtos.request.ReportRequest;
 import co.uniquindio.dtos.response.PaginatedReportResponse;
 import co.uniquindio.dtos.response.ReportResponse;
 import co.uniquindio.enums.ReportStatus;
+import co.uniquindio.enums.Role;
 import co.uniquindio.mappers.ReportMapper;
 import co.uniquindio.model.*;
 import co.uniquindio.repository.ReportRepository;
+import co.uniquindio.repository.UserRepository;
 import co.uniquindio.service.CategoryService;
 import co.uniquindio.service.NotificationService;
 import co.uniquindio.service.ReportHistoryService;
@@ -39,6 +41,7 @@ public class ReportServiceImpl implements ReportService {
     private final CategoryService categoryService;
     private final NotificationService notificationService;
     private final org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
+    private final UserRepository userRepository;
 
     @Override
     public ReportResponse createReport(ReportRequest reportRequest, List<MultipartFile>images, String userId) {
@@ -133,15 +136,28 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Optional<ReportResponse> changeReportStatus(String id, ReportStatus status, String userId) {
-        Report report = reportRepository.findById(id).orElseThrow(()->new RuntimeException("No se encontro el reporte con el id: "+id));
-        report.setStatus(status);
-        reportRepository.save(report);
+        if( isValidChangeStatus(userId, status)) {
 
-        reportHistoryService.saveReportHistory(report.getId(), userId,"CHANGE_STATUS",
-                "El usuario con el id :"+userId+" cambio el estado del reporte con el id : "+report.getId()
-                        +". Al estado de :"+status
-                        +". En la fecha : "+LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-d|HH:mm:ss")));
-        return Optional.of(reportMapper.toResponse(report));
+            Report report = reportRepository.findById(id).orElseThrow(() -> new RuntimeException("No se encontro el reporte con el id: " + id));
+            report.setStatus(status);
+            reportRepository.save(report);
+
+            reportHistoryService.saveReportHistory(report.getId(), userId, "CHANGE_STATUS",
+                    "El usuario con el id :" + userId + " cambio el estado del reporte con el id : " + report.getId()
+                            + ". Al estado de :" + status
+                            + ". En la fecha : " + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-d|HH:mm:ss")));
+            return Optional.of(reportMapper.toResponse(report));
+        }else{
+            throw new RuntimeException("No se puede cambiar el estado del reporte, no tienes permisos necesarios");
+        }
+    }
+
+    private boolean isValidChangeStatus(String userId, ReportStatus status) {
+        User user = userRepository.findById(userId).get();
+        if(user.getRole().equals(Role.ADMIN)){
+            return true;
+        }
+        return status.equals(ReportStatus.DELETED);
     }
 
 
@@ -153,10 +169,6 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("No se encontro el reporte con el id: " + id));
 
-        //CORREGIR
-        if (!userIdIsValid(userId)) {
-            throw new RuntimeException("El id del usuario no es valido");
-        }
         report.setTitle(reportRequest.title()!=null ? reportRequest.title() : report.getTitle());
 
         report.setDescription(reportRequest.description()!=null ? reportRequest.description() : report.getDescription());
