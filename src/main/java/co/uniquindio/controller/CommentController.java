@@ -6,6 +6,7 @@ import co.uniquindio.dtos.response.CommentResponse;
 import co.uniquindio.dtos.response.PaginatedCommentResponse;
 import co.uniquindio.model.User;
 import co.uniquindio.service.CommentService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -23,7 +24,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping
-    public ResponseEntity<CommentResponse> createComment(@RequestBody CommentRequest commentRequest,
+    public ResponseEntity<CommentResponse> createComment(@RequestBody @Valid CommentRequest commentRequest,
                                                         @AuthenticationPrincipal UserDetails userDetails){
         User user = ((CustomUserDetails) userDetails).getUser();
         String userId = user.getId();

@@ -52,10 +52,14 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public void deleteComment(String id) {
+    public void deleteComment(String id, String userId) {
         Comment comment = commentRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("No se encontro el comentario con el id: "+id));
+        if(comment.getUserId().equals(userId)){
         comment.setStatus(CommentStatus.DELETED);
+        }else {
+            throw new RuntimeException("No eres el creador de este comentario ni eres administrador");
+        }
         commentRepository.save(comment);
     }
 

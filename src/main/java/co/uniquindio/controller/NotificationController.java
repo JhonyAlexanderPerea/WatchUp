@@ -32,8 +32,10 @@ public class NotificationController {
     }
 
     @PatchMapping("/{id}")
-    public Optional<NotificationResponse> changeNotificationStatus(@PathVariable String id){
-        return Optional.ofNullable(notificationService.changeNotificationStatus(id));
+    public Optional<NotificationResponse> changeNotificationStatus(@PathVariable String id, @AuthenticationPrincipal UserDetails userDetails){
+        User user = ((CustomUserDetails) userDetails).getUser();
+        String userId = user.getId();
+        return Optional.ofNullable(notificationService.changeNotificationStatus(id, userId));
     }
 
 

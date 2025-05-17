@@ -5,6 +5,7 @@ import co.uniquindio.dtos.response.CategoryResponse;
 import co.uniquindio.dtos.response.PaginatedCategoryResponse;
 import co.uniquindio.repository.CategoryRepository;
 import co.uniquindio.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -23,7 +24,7 @@ public class CategoryController {
     private final CategoryService categoryService;
 
     @PostMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryRequest categoryRequest){
+    public ResponseEntity<CategoryResponse> createCategory(@RequestBody @Valid CategoryRequest categoryRequest){
         var categoryResponse = categoryService.createCategory(categoryRequest);
 
         URI location = ServletUriComponentsBuilder.
@@ -46,7 +47,7 @@ public class CategoryController {
         return categoryService.getCategory(id).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponse> updateCategory(@PathVariable String id, @RequestBody CategoryRequest categoryRequest){
+    public ResponseEntity<CategoryResponse> updateCategory(@PathVariable String id, @RequestBody @Valid CategoryRequest categoryRequest){
         return categoryService.updateCategory(id, categoryRequest).map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
     @DeleteMapping("/{id}")

@@ -83,11 +83,16 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
-    public NotificationResponse changeNotificationStatus(String id) {
+    public NotificationResponse changeNotificationStatus(String id, String userId) {
         Notification notification = notificationRepository.findById(id)
                 .orElseThrow(()->new RuntimeException("No se encontro la notificacion con el id: "+id));
-        notification.setStatus(NotificationStatus.VIEWED);
-        notificationRepository.save(notification);
+        if(notification.getUserId().equals(userId)) {
+            notification.setStatus(NotificationStatus.VIEWED);
+            notificationRepository.save(notification);
+        }else{
+            throw new RuntimeException("No eres el usuario de esta notificacion");
+        }
+
         return notificationMapper.toResponse(notification);
     }
 

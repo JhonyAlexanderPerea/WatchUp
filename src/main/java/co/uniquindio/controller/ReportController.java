@@ -9,6 +9,7 @@ import co.uniquindio.dtos.response.PaginatedReportResponse;
 import co.uniquindio.dtos.response.ReportResponse;
 import co.uniquindio.model.User;
 import co.uniquindio.service.ReportService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -16,6 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
@@ -33,7 +35,7 @@ public class ReportController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
             produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<ReportResponse> createReport(@RequestPart("metadata") ReportRequest reportRequest,
+    public ResponseEntity<ReportResponse> createReport(@RequestPart("metadata") @Valid ReportRequest reportRequest,
                                                        @RequestPart("images") List<MultipartFile> images,
                                                        @AuthenticationPrincipal UserDetails userDetails) {
         User user = ((CustomUserDetails) userDetails).getUser();
@@ -78,7 +80,7 @@ public class ReportController {
 
     @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     Optional<ReportResponse> updateReport(@PathVariable String id,
-                                          @RequestPart("metadata") ReportRequest reportRequest,
+                                          @RequestPart("metadata") @Valid ReportRequest reportRequest,
                                           @RequestPart(value = "newImages", required = false) List<MultipartFile> newImages,
                                           @RequestParam(value = "imagesToDelete" ,required = false)List<Integer> imagesToDelete,
                                           @RequestParam(value = "categoriesToDelete", required = false) List<Integer> categoriesToDelete,
