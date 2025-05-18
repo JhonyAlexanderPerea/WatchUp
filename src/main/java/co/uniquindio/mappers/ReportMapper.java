@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {CommentMapper.class, CategoryMapper.class, CategoryService.class, CloudinaryService.class})
@@ -47,15 +48,19 @@ public interface ReportMapper {
             List<MultipartFile> images,
             CloudinaryService cloudinaryService
     ) {
-        return images.parallelStream() // 👈 Stream paralelo
-                .map(file -> {
-                    try {
-                        return cloudinaryService.uploadFile(file).get(); // Bloquea hasta completar
-                    } catch (Exception e) {
-                        throw new RuntimeException("Error al subir imagen", e);
-                    }
-                })
+        List<CompletableFuture<String>> futures = images.stream()
+                .map(file -> cloudinaryService.uploadFile(file))
                 .collect(Collectors.toList());
+
+        CompletableFuture<Void> allFutures = CompletableFuture.allOf(
+                futures.toArray(new CompletableFuture[0])
+        );
+
+        return allFutures.thenApply(v ->
+                futures.stream()
+                        .map(CompletableFuture::join)
+                        .collect(Collectors.toList())
+        ).join();
     }
 
     default GeoJsonPoint locationToGeoJsonPoint(Location location) {
