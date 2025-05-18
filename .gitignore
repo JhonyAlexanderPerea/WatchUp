@@ -25,7 +25,9 @@ bin/
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
-
+src/main/resources/public_key.pem
+src/main/resources/.env
+src/main/resources/private_key.pem
 ### NetBeans ###
 /nbproject/private/
 /nbbuild/
@@ -35,3 +37,5 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
