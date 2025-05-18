@@ -6,6 +6,7 @@ import co.uniquindio.model.Category;
 import co.uniquindio.model.Report;
 import co.uniquindio.repository.CategoryRepository;
 import co.uniquindio.service.CategoryService;
+import co.uniquindio.util.CloudinaryService;
 import org.bson.types.ObjectId;
 import org.mapstruct.*;
 import org.springframework.data.mongodb.core.geo.GeoJsonPoint;
@@ -15,8 +16,9 @@ import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.*;
+import java.util.stream.Collectors;
 
-@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {CommentMapper.class, CategoryMapper.class, CategoryService.class})
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING, uses = {CommentMapper.class, CategoryMapper.class, CategoryService.class, CloudinaryService.class})
 public interface ReportMapper {
     @Mapping(target = "id", expression = "java(java.util.UUID.randomUUID().toString())")
     @Mapping(target = "userId", ignore = true)
@@ -25,40 +27,35 @@ public interface ReportMapper {
     @Mapping(target = "important", constant = "0")
     @Mapping(target = "isFake", constant = "0")
     @Mapping(target = "comments", expression = "java(new java.util.ArrayList<>())")
-    @Mapping(target = "images", expression = "java(convertMultipartFilesToBytes(images))")
+    @Mapping(target = "images", expression = "java(uploadImagesToCloudinary(images, cloudinaryService))")
     @Mapping(target = "location", expression = "java(locationToGeoJsonPoint(reportRequest.location()))")
     @Mapping(target = "categories", expression = "java(mapCategoryNamesToCategories(reportRequest.categories(), categoryService))")
     @Mapping(target="usersGaveImportant", expression = "java(new java.util.ArrayList<>())")
     @Mapping(target="usersGaveIsFake", expression = "java(new java.util.ArrayList<>())")
-    Report parseOf(ReportRequest reportRequest, List<MultipartFile>images, @Context CategoryService categoryService);
+    Report parseOf(ReportRequest reportRequest, List<MultipartFile>images, @Context CategoryService categoryService, @Context CloudinaryService cloudinaryService);
 
 
     @Mapping(target = "location", expression = "java(geoJsonPointToLocation(report.getLocation()))")
-    @Mapping(target = "images", expression = "java(convertBytesToBase64(report.getImages()))")
+    @Mapping(target = "images", source = "images")
     @Mapping(target = "categories", source = "categories")
     @Mapping(target = "comments", source = "comments")
     @Mapping(target = "userId", expression = "java(ObjectIdToString(report.getUserId()))")
     ReportResponse toResponse(Report report);
 
 
-
-    // Métodos de conversión personalizados
-    default List<String> convertBytesToBase64(List<byte[]> imagenes) {
-        return imagenes.stream()
-                .map(bytes -> "data:image/png;base64," + Base64.getEncoder().encodeToString(bytes))
-                .toList();
-    }
-
-    default List<byte[]> convertMultipartFilesToBytes(List<MultipartFile> imagenes) {
-        return imagenes.stream()
+    default List<String> uploadImagesToCloudinary(
+            List<MultipartFile> images,
+            CloudinaryService cloudinaryService
+    ) {
+        return images.parallelStream() // 👈 Stream paralelo
                 .map(file -> {
                     try {
-                        return file.getBytes();
-                    } catch (IOException e) {
-                        throw new RuntimeException("Error al convertir MultipartFile a byte[]", e);
+                        return cloudinaryService.uploadFile(file).get(); // Bloquea hasta completar
+                    } catch (Exception e) {
+                        throw new RuntimeException("Error al subir imagen", e);
                     }
                 })
-                .toList();
+                .collect(Collectors.toList());
     }
 
     default GeoJsonPoint locationToGeoJsonPoint(Location location) {

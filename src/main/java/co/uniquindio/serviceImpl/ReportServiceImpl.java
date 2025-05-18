@@ -19,6 +19,7 @@ import co.uniquindio.service.CategoryService;
 import co.uniquindio.service.NotificationService;
 import co.uniquindio.service.ReportHistoryService;
 import co.uniquindio.service.ReportService;
+import co.uniquindio.util.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.bson.types.ObjectId;
 import org.springframework.data.domain.PageRequest;
@@ -27,6 +28,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.geo.Point;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,11 +48,13 @@ public class ReportServiceImpl implements ReportService {
     private final NotificationService notificationService;
     private final org.springframework.data.mongodb.core.MongoTemplate mongoTemplate;
     private final UserRepository userRepository;
+    private final CloudinaryService cloudinaryService;
 
     @Override
     public ReportResponse createReport(ReportRequest reportRequest, List<MultipartFile>images, String userId) {
         if(reportRequestIsValid(reportRequest) && images!=null && !images.isEmpty()){
-            Report newReport = reportMapper.parseOf(reportRequest, images, categoryService);
+
+            Report newReport = reportMapper.parseOf(reportRequest, images, categoryService, cloudinaryService);
             ObjectId id = new ObjectId(userId);
             if(!userIdIsValid(userId)){
                 throw new RuntimeException("El id del usuario no es valido");
@@ -70,6 +75,15 @@ public class ReportServiceImpl implements ReportService {
     public PaginatedReportResponse getReports(String title, String userId, String category,
                                               String status, String order, LocalDateTime creationDate,
                                               Location location, int page) {
+        // 0. Verificacion rol de usuario
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = false;
+
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication.getPrincipal() instanceof String)) {
+            isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
 
         // 1. Configurar paginación y ordenamiento
         Pageable pageable = PageRequest.of(page, 10, parseSort(order)); // 10 items por página
@@ -77,6 +91,11 @@ public class ReportServiceImpl implements ReportService {
 
         // 2. Construir criterios dinámicos
         Criteria criteria = new Criteria();
+
+        // Excluir DELETED si no es admin
+        if (!isAdmin) {
+            criteria.and("status").ne(ReportStatus.DELETED);
+        }
 
         if (title != null && !title.isEmpty()) {
             criteria.and("title").regex(title, "i"); // Búsqueda case-insensitive
@@ -92,11 +111,11 @@ public class ReportServiceImpl implements ReportService {
 
         if (status != null && !status.isEmpty()) {
             try {
-                ReportStatus.valueOf(status.toUpperCase());
+                ReportStatus statusEnum = ReportStatus.valueOf(status.toUpperCase());
+                criteria.and("status").is(statusEnum);
             } catch (IllegalArgumentException e) {
                 throw new IllegalArgumentException("Estado inválido: " + status);
             }
-            criteria.and("status").is(ReportStatus.valueOf(status.toUpperCase()));
         }
 
         if (creationDate != null) {
@@ -134,6 +153,24 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Optional<ReportResponse> getReport(String id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = false;
+
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication.getPrincipal() instanceof String)) {
+            isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
+        if(!isAdmin){
+            if(reportRepository.findById(id).isPresent()){
+                Report report = reportRepository.findById(id).get();
+                if(report.getStatus().equals(ReportStatus.DELETED)){
+                    throw new NotFoundException("No se encontro el reporte con el id: "+id);
+                }
+            }else{
+                throw new NotFoundException("No se encontro el reporte con el id: "+id);
+            }
+        }
         Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("No se encontro el reporte"));
         return reportMapper.toResponse(report) != null ? Optional.of(reportMapper.toResponse(report)) : Optional.empty();
     }
@@ -173,6 +210,20 @@ public class ReportServiceImpl implements ReportService {
         Report report = reportRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("No se encontro el reporte con el id: " + id));
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = false;
+
+        if (authentication != null && authentication.isAuthenticated()
+                && !(authentication.getPrincipal() instanceof String)) {
+            isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
+        if(!isAdmin || report.getUserId().toString().equals(userId)){
+            throw new NotPermissionException("No tienes permisos necesarios para modificar el reporte");
+        }
+        if(report.getStatus().equals(ReportStatus.DELETED)){
+            throw new NotFoundException("No se encontro el reporte con el id: "+id);
+        }
         report.setTitle(reportRequest.title()!=null ? reportRequest.title() : report.getTitle());
 
         report.setDescription(reportRequest.description()!=null ? reportRequest.description() : report.getDescription());
@@ -224,6 +275,9 @@ public class ReportServiceImpl implements ReportService {
     public void deleteReport(String id, String userId) {
         Report auxReport = reportRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("No se encontro el reporte con el id: " + id));
+        if(auxReport.getStatus().equals(ReportStatus.DELETED)){
+            throw new NotFoundException("No se encontro el reporte con el id: "+id);
+        }
         auxReport.setStatus(ReportStatus.DELETED);
         reportHistoryService.saveReportHistory(id, userId, "DELETE",
                 "El usuario con el id :"+userId+" elimino el reporte con el id : "+id
@@ -290,22 +344,6 @@ public class ReportServiceImpl implements ReportService {
         return ObjectId.isValid(id);
     }
 
-    public static List<byte[]> multiPartFileToByte(List<MultipartFile> images) {
-        if (images != null && !images.isEmpty()) {
-            return images.stream()
-                    .map(file -> {
-                        try {
-                            return file.getBytes();
-                        } catch (IOException e) {
-                            throw new RuntimeException("Error al procesar imágenes");
-                        }
-                    })
-                    .toList();
-        }else{
-            throw new InvalidValueException("Alguien esta pendejo");
-        }
-    }
-
     public void comprobarUserGaveImportantExist(Report report){
         if(report.getUsersGaveImportant()!=null){
             return;
@@ -337,8 +375,8 @@ public class ReportServiceImpl implements ReportService {
         return categories;
     }
 
-    public List<byte[]> añadirIamgenesNuevas(Report report, List<MultipartFile>newImages, List<Integer>imagesToDelete){
-        List<byte[]> images = report.getImages();
+    public List<String> añadirIamgenesNuevas(Report report, List<MultipartFile>newImages, List<Integer>imagesToDelete){
+        List<String> images = report.getImages();
         if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
             imagesToDelete.sort((o1, o2) -> o2.compareTo(o1));
             for (int index : imagesToDelete) {
@@ -348,7 +386,7 @@ public class ReportServiceImpl implements ReportService {
             }
         }
         if (newImages != null && !newImages.isEmpty()) {
-            List<byte[]> auxImages = multiPartFileToByte(newImages);
+            List<String> auxImages = reportMapper.uploadImagesToCloudinary(newImages, cloudinaryService);
             for (int i = 0; i < newImages.size(); i++) {
                 if (newImages.get(i)!=null &&!newImages.get(i).isEmpty()) {
                     images.add(auxImages.get(i));

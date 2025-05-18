@@ -10,6 +10,7 @@ import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.enums.Role;
 import co.uniquindio.enums.UserStatus;
 import co.uniquindio.exceptions.ApiExceptions;
+import co.uniquindio.exceptions.NotFoundException;
 import co.uniquindio.mappers.UserMapper;
 import co.uniquindio.model.User;
 import co.uniquindio.repository.UserRepository;
@@ -177,6 +178,9 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ApiExceptions.ResourceNotFoundException("Usuario no encontrado con ID: " + id));
 
+        if(user.getStatus().equals(UserStatus.INACTIVE)){
+            throw new NotFoundException("No se encontro el usuario al cual quiere modificar la contraseña");
+        }
         if (!passwordEncoder.matches(request.currentPassword(), user.getPassword())) {
             throw new ApiExceptions.InvalidPasswordException("La contraseña actual no es correcta");
         }
@@ -196,7 +200,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public Optional<UserResponse> updateUser(String id, UserUpdateRequest request) {
         log.debug("Iniciando actualización de usuario con ID: {}", id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ApiExceptions.ResourceNotFoundException("Usuario no encontrado con ID: " + id));
 
+        if(user.getStatus().equals(UserStatus.INACTIVE)){
+            throw new NotFoundException("No se encontro el usuario al cual quiere modificar la contraseña");
+        }
         return userRepository.findById(id)
                 .map(existingUser -> {
                     try {
@@ -261,7 +270,10 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(String id) {
         try{
-            User user = userRepository.findById(id).get();
+            User user = userRepository.findById(id).orElseThrow(() -> new ApiExceptions.NotFoundException("Usuario no encontrado con ID: " + id));
+            if(user.getStatus().equals(UserStatus.INACTIVE)){
+                throw new NotFoundException("No se encontro el usuario al que desae eliminar");
+            }
             user.setStatus(UserStatus.INACTIVE);
             userRepository.save(user);
             log.info("Usuario con ID: {} se ha desactivado exitosamente", id);

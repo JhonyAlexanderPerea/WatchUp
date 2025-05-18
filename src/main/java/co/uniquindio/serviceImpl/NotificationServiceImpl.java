@@ -41,6 +41,13 @@ public class NotificationServiceImpl implements NotificationService {
                 1000 // Radio en metros
         );
         if (usersNearby != null && !usersNearby.isEmpty()) {
+            try {
+                usersNearby.remove(userRepository.findById(report.getUserId().toString()));
+               usersNearby.stream().anyMatch(user -> user.getId().equals(report.getUserId().toString()) ? usersNearby.remove(user) : true);
+            }catch (Exception e){
+                System.out.println("ERROR INESPERADO, no se encontro al usuario creador del reporte: "
+                        + report.getId() + " en el metodo: makeNotifacationToAll() de la clase: NotificationServiceImpl.java");
+            }
             // 2. Crear notificaciones para cada usuario
             List<Notification> notifications = new ArrayList<>();
             for (User user : usersNearby) {

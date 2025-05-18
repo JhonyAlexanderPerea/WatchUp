@@ -41,8 +41,6 @@ public class ReportController {
                                                        @RequestPart("images") List<MultipartFile> images,
                                                        @AuthenticationPrincipal UserDetails userDetails) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("Authentication: " + auth); // ¿Es null?
-        System.out.println("UserDetails: " + userDetails); // ¿Es null?
         User user = ((CustomUserDetails) userDetails).getUser();
         String userId = user.getId();
         var reportResponse = reportService.createReport(reportRequest, images,userId);
@@ -65,6 +63,17 @@ public class ReportController {
                                        @RequestParam(required = false) Location location,
                                        @RequestParam(required = false) @DefaultValue(value = "0") Integer page ){
         int pageNumber = (page != null) ? page : 0;
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        boolean isAdmin = false;
+        if (authentication != null && authentication.isAuthenticated()) {
+            isAdmin = authentication.getAuthorities().stream()
+                    .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        }
+
+// Si no está autenticado, forzar filtro DELETED
+        if (authentication == null || authentication.getPrincipal() instanceof String) {
+            isAdmin = false;
+        }
         return reportService.getReports(title,userId,category,status,order,registerDate,location, pageNumber);
     }
 

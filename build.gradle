@@ -43,6 +43,14 @@ dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-webflux'
 	implementation 'org.springframework.boot:spring-boot-starter-websocket'
 
+
+	// Dependencia de Cloudinary
+	implementation 'com.cloudinary:cloudinary-http5:2.0.0'
+	implementation 'com.cloudinary:cloudinary-taglib:2.0.0'
+	// Dotenv (para cargar variables de entorno desde .env)
+	implementation 'io.github.cdimascio:dotenv-java:2.2.4'
+
+
 	//Api para obtener coordenadas de la ciudad
 	implementation 'org.springframework:spring-web'
 	implementation 'com.fasterxml.jackson.core:jackson-databind'
