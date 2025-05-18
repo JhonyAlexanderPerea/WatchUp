@@ -7,7 +7,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @Slf4j
@@ -18,14 +21,18 @@ public class EmailService {
 
     private final JavaMailSender mailSender;
 
+
     public EmailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
 
-    public void enviarNotificacionReporte(String destinatario, String tipoReporte,
+    @Async("taskExecutor")
+    public CompletableFuture<Void> enviarNotificacionReporte(String destinatario, String tipoReporte,
                                           String idReporte, String fecha,
                                           String descripcion, String enlaceReporte)
             throws MessagingException {
+        try {
+            // Lógica de envío
 
         String colorFondo = "";
         String icono = "";
@@ -106,6 +113,10 @@ public class EmailService {
         helper.setText(htmlContent, true);
 
         mailSender.send(message);
+            return CompletableFuture.completedFuture(null);
+        } catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
+        }
     }
 
 
@@ -128,8 +139,8 @@ public class EmailService {
         }
     }
 
-
-    public void sendActivationEmail(String toEmail, String activationCode) {
+    @Async("taskExecutor")
+    public CompletableFuture<Void> sendActivationEmail(String toEmail, String activationCode) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -160,13 +171,20 @@ public class EmailService {
             mailSender.send(message);
             
             log.info("Email de activación enviado a: {}", toEmail);
-        } catch (Exception e) {
+            return CompletableFuture.completedFuture(null);
+        }catch (MessagingException e)
+        {
             log.error("Error enviando email de activación", e);
-            throw new ApiExceptions.EmailSendException("Error al enviar el email de activación");
+            throw new RuntimeException(e.getMessage());
+        }
+        catch (Exception e) {
+
+            return CompletableFuture.failedFuture(e);
         }
     }
 
-    public void sendPasswordResetEmail(String toEmail, String resetCode) {
+    @Async("taskExecutor")
+    public CompletableFuture<Void> sendPasswordResetEmail(String toEmail, String resetCode) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true);
@@ -193,10 +211,15 @@ public class EmailService {
             mailSender.send(message);
             
             log.info("Email de restablecimiento de contraseña enviado a: {}", toEmail);
-        } catch (Exception e) {
+            return CompletableFuture.completedFuture(null);
+        }
+        catch (ApiExceptions.EmailSendException e) {
             log.error("Error enviando email de restablecimiento de contraseña", e);
             throw new ApiExceptions.EmailSendException("Error al enviar el email de restablecimiento de contraseña");
+        }catch (Exception e) {
+            return CompletableFuture.failedFuture(e);
         }
+
     }
 
     public void sendWelcomeEmail(String toEmail, String fullName) {
@@ -230,4 +253,6 @@ public class EmailService {
             throw new ApiExceptions.EmailSendException("Error al enviar el email de bienvenida");
         }
     }
+
+
 }

@@ -6,6 +6,9 @@ import co.uniquindio.dtos.response.CommentResponse;
 import co.uniquindio.dtos.response.PaginatedCommentResponse;
 import co.uniquindio.enums.CommentStatus;
 import co.uniquindio.enums.ReportStatus;
+import co.uniquindio.exceptions.AccessDeniedException;
+import co.uniquindio.exceptions.InvalidValueException;
+import co.uniquindio.exceptions.NotFoundException;
 import co.uniquindio.mappers.CommentMapper;
 import co.uniquindio.model.Comment;
 import co.uniquindio.model.Report;
@@ -39,7 +42,7 @@ public class CommentServiceImpl implements CommentService {
         comment.setReportId(commentRequest.reportId());
         comment.setUserId(userId);
         Report report =reportRepository.findById(commentRequest.reportId())
-                .orElseThrow(()->new RuntimeException("No se encontro el reporte con el id: "+commentRequest.reportId()));
+                .orElseThrow(()->new NotFoundException("No se encontro el reporte con el id: "+commentRequest.reportId()));
         report.getComments().add(comment);
         reportRepository.save(report);
 
@@ -54,11 +57,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(String id, String userId) {
         Comment comment = commentRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("No se encontro el comentario con el id: "+id));
+                .orElseThrow(()->new NotFoundException("No se encontro el comentario con el id: "+id));
         if(comment.getUserId().equals(userId)){
         comment.setStatus(CommentStatus.DELETED);
         }else {
-            throw new RuntimeException("No eres el creador de este comentario ni eres administrador");
+            throw new AccessDeniedException("No eres el creador de este comentario ni eres administrador");
         }
         commentRepository.save(comment);
     }
@@ -91,11 +94,11 @@ public class CommentServiceImpl implements CommentService {
             criteria.and("userId").is(new ObjectId(userId));
         }
 
-        if (status != null && !status.isEmpty()) {
+    if (status != null && !status.isEmpty()) {
             try {
                 ReportStatus.valueOf(status.toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Estado inválido: " + status);
+                throw new InvalidValueException("Estado inválido: " + status);
             }
             criteria.and("status").is(ReportStatus.valueOf(status.toUpperCase()));
         }
@@ -108,13 +111,7 @@ public class CommentServiceImpl implements CommentService {
 
         // 4. Ejecutar consulta paginada
         long total = mongoTemplate.count(dynamicQuery, Comment.class);
-        List<Comment> reports = mongoTemplate.find(dynamicQuery, Comment.class);
-        List<Comment> comments = new ArrayList<>();
-        if(reportId==null || reportId.isEmpty()){
-            comments=commentRepository.findAll();
-        }else{
-            comments= commentRepository.findCommentsByReportId(reportId);
-        }
+        List<Comment> comments = mongoTemplate.find(dynamicQuery, Comment.class);
 
         List<CommentResponse> commentResponses = new ArrayList<>();
         for (Comment comment : comments) {

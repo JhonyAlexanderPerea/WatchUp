@@ -15,7 +15,9 @@ import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -38,6 +40,9 @@ public class ReportController {
     public ResponseEntity<ReportResponse> createReport(@RequestPart("metadata") @Valid ReportRequest reportRequest,
                                                        @RequestPart("images") List<MultipartFile> images,
                                                        @AuthenticationPrincipal UserDetails userDetails) {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        System.out.println("Authentication: " + auth); // ¿Es null?
+        System.out.println("UserDetails: " + userDetails); // ¿Es null?
         User user = ((CustomUserDetails) userDetails).getUser();
         String userId = user.getId();
         var reportResponse = reportService.createReport(reportRequest, images,userId);

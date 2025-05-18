@@ -3,10 +3,14 @@ package co.uniquindio.service;
 import co.uniquindio.dtos.response.NotificationResponse;
 import co.uniquindio.dtos.response.PaginatedNotificationResponse;
 import co.uniquindio.model.Report;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.prepost.PreAuthorize;
 
+import java.util.concurrent.CompletableFuture;
+
 public interface NotificationService {
-    void makeNotifacationToAll(Report report);
+    @Async("taskExecutor")
+    CompletableFuture<Void> makeNotifacationToAll(Report report);
     @PreAuthorize("hasAuthority('ADMIN') or isAuthenticated()")
     PaginatedNotificationResponse getNotifications(String userId, String status);
     @PreAuthorize("hasAuthority('ADMIN') or isAuthenticated()")

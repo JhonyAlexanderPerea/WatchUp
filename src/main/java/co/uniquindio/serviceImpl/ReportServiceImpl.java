@@ -8,6 +8,9 @@ import co.uniquindio.dtos.response.PaginatedReportResponse;
 import co.uniquindio.dtos.response.ReportResponse;
 import co.uniquindio.enums.ReportStatus;
 import co.uniquindio.enums.Role;
+import co.uniquindio.exceptions.InvalidValueException;
+import co.uniquindio.exceptions.NotFoundException;
+import co.uniquindio.exceptions.NotPermissionException;
 import co.uniquindio.mappers.ReportMapper;
 import co.uniquindio.model.*;
 import co.uniquindio.repository.ReportRepository;
@@ -58,7 +61,7 @@ public class ReportServiceImpl implements ReportService {
             +". En la fecha : "+newReport.getCreationDate().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-d|HH:mm:ss")));
             return  reportMapper.toResponse(reportRepository.save(newReport));
         }else{
-            throw new RuntimeException("Algun campo del reporte no es valido, revise los campos y vuelva a intentarlo");
+            throw new InvalidValueException("Algun campo del reporte no es valido, revise los campos y vuelva a intentarlo");
         }
 
     }
@@ -131,7 +134,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public Optional<ReportResponse> getReport(String id) {
-        return reportRepository.findById(id).map(reportMapper::toResponse);
+        Report report = reportRepository.findById(id).orElseThrow(() -> new NotFoundException("No se encontro el reporte"));
+        return reportMapper.toResponse(report) != null ? Optional.of(reportMapper.toResponse(report)) : Optional.empty();
     }
 
     @Override
@@ -148,7 +152,7 @@ public class ReportServiceImpl implements ReportService {
                             + ". En la fecha : " + LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyy-MM-d|HH:mm:ss")));
             return Optional.of(reportMapper.toResponse(report));
         }else{
-            throw new RuntimeException("No se puede cambiar el estado del reporte, no tienes permisos necesarios");
+            throw new NotPermissionException("No se puede cambiar el estado del reporte, no tienes permisos necesarios");
         }
     }
 
@@ -167,7 +171,7 @@ public class ReportServiceImpl implements ReportService {
                                                  List<Integer>categoriesToDelete, ReportRequest reportRequest,
                                                  String userId) {
         Report report = reportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se encontro el reporte con el id: " + id));
+                .orElseThrow(() -> new NotFoundException("No se encontro el reporte con el id: " + id));
 
         report.setTitle(reportRequest.title()!=null ? reportRequest.title() : report.getTitle());
 
@@ -219,7 +223,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     public void deleteReport(String id, String userId) {
         Report auxReport = reportRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se encontro el reporte con el id: " + id));
+                .orElseThrow(() -> new NotFoundException("No se encontro el reporte con el id: " + id));
         auxReport.setStatus(ReportStatus.DELETED);
         reportHistoryService.saveReportHistory(id, userId, "DELETE",
                 "El usuario con el id :"+userId+" elimino el reporte con el id : "+id
@@ -250,7 +254,7 @@ public class ReportServiceImpl implements ReportService {
             report.getUsersGaveImportant().add(userId);
             reportRepository.save(report);
         }else{
-            throw new RuntimeException("No se encontro el reporte con el id: "+reportId);
+            throw new NotFoundException("No se encontro el reporte con el id: "+reportId);
         }
     }
 
@@ -271,7 +275,7 @@ public class ReportServiceImpl implements ReportService {
             report.getUsersGaveIsFake().add(userId);
             reportRepository.save(report);
         }else{
-            throw new RuntimeException("No se encontro el reporte con el id: "+reportId);
+            throw new NotFoundException("No se encontro el reporte con el id: "+reportId);
         }
     }
 
@@ -298,7 +302,7 @@ public class ReportServiceImpl implements ReportService {
                     })
                     .toList();
         }else{
-            throw new RuntimeException("Alguien esta pendejo");
+            throw new InvalidValueException("Alguien esta pendejo");
         }
     }
 

@@ -4,6 +4,8 @@ import co.uniquindio.dtos.common.PaginatedContent;
 import co.uniquindio.dtos.request.CategoryRequest;
 import co.uniquindio.dtos.response.CategoryResponse;
 import co.uniquindio.dtos.response.PaginatedCategoryResponse;
+import co.uniquindio.exceptions.FoundMatchException;
+import co.uniquindio.exceptions.NotFoundException;
 import co.uniquindio.mappers.CategoryMapper;
 import co.uniquindio.model.Category;
 import co.uniquindio.repository.CategoryRepository;
@@ -30,7 +32,7 @@ public class CategoryServiceImpl implements CategoryService {
         Category category = categoryMapper.parseOf(categoryRequest);
         System.out.println(category.getName());
         if(categoryRepository.findByName(category.getName())!=null){
-            throw new RuntimeException("Ya existe una categoria con el nombre: "+category.getName());
+            throw new FoundMatchException("Ya existe una categoria con el nombre: "+category.getName());
         }
         return categoryMapper.toResponse(categoryRepository.save(category)) ;
     }
@@ -38,7 +40,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Optional<CategoryResponse> getCategory(String id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("No se encontro la categoria con el id: "+id));
+                .orElseThrow(()->new NotFoundException("No se encontro la categoria con el id: "+id
+                        +"\nPuede de que no exista o se haya eliminado de la base de datos"));
         return Optional.ofNullable(categoryMapper.toResponse(category));
     }
 
@@ -57,7 +60,7 @@ public class CategoryServiceImpl implements CategoryService {
                     new PaginatedContent((auxList.size()+9)/10, auxList.size(), page, 10)
             );
         }
-        throw new RuntimeException("No se encontro ninguna categoria");
+        throw new NotFoundException("No se encontro ninguna categoria, comunicarse con el equipo por favor");
 
     }
 
@@ -70,7 +73,8 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public void deleteCategory(String id) {
         if(categoryRepository.findById(id).isEmpty()){
-            throw new RuntimeException("No se encontro la categoria con el id: "+id);
+            throw new NotFoundException("No se encontro la categoria con el id: "+id
+                    +"\nPuede de que no exista o se haya eliminado de la base de datos");
         }
         categoryRepository.deleteById(id);
         if(categoryRepository.findById(id).isPresent()){
@@ -81,10 +85,11 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public Optional<CategoryResponse> updateCategory(String id, CategoryRequest categoryRequest) {
         Category category =  categoryRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("No se encontro la categoria con el id: "+id)) ;
+                .orElseThrow(()->new NotFoundException("No se encontro la categoria con el id: "+id
+                        +"\nPuede de que no exista o se haya eliminado de la base de datos")) ;
         if(categoryRequest.name()!=null && !categoryRequest.name().isEmpty()){
             if(categoryRepository.findByName(category.getName())!=null){
-                throw new RuntimeException("Ya existe una categoria con el nombre: "+category.getName());
+                throw new FoundMatchException("Ya existe una categoria con el nombre: "+category.getName());
             }else{
                 category.setName(categoryRequest.name());
             }
@@ -94,13 +99,13 @@ public class CategoryServiceImpl implements CategoryService {
         }
         if(categoryRepository.findById(id).isPresent()){
             return Optional.ofNullable(categoryMapper.toResponse(categoryRepository.save(category)));
-        }else throw new RuntimeException("No se encontro la categoria con el id: "+id
+        }else throw new NotFoundException("No se encontro la categoria con el id: "+id
                                         +" y no se pudo actualizar");
     }
 
     @Override
     public Category getCategoryByName(String name) {
         return Optional.ofNullable(categoryRepository.findByName(name))
-                .orElseThrow(()->new RuntimeException("No se encontro la categoria: "+name));
+                .orElseThrow(()->new NotFoundException("No se encontro la categoria: "+name));
     }
 }

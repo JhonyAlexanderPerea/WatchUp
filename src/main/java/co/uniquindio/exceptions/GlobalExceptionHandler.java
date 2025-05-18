@@ -45,4 +45,29 @@ public class GlobalExceptionHandler {
 
         return new ResponseEntity<>(errorBody, status);
     }
+
+    @ExceptionHandler(NotFoundException.class)
+    public ResponseEntity<?> handleNotFound(NotFoundException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidValueException.class)
+    public ResponseEntity<?> handleInvalidValue(InvalidValueException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(NotPermissionException.class)
+    public ResponseEntity<?> handleNotPermission(NotPermissionException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<?> handleAccessDenied(AccessDeniedException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(FoundMatchException.class)
+    public ResponseEntity<?> handleFoundMatch(FoundMatchException ex) {
+        return buildResponse(ex.getMessage(), HttpStatus.NOT_ACCEPTABLE);
+    }
 }
