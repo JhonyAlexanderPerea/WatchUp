@@ -9,7 +9,7 @@ public class AsyncConfig {
     @Bean(name = "taskExecutor")
     public Executor taskExecutor() {
         ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-        executor.setCorePoolSize(5); // Hilos activos mínimos
+        executor.setCorePoolSize(1); // Hilos activos mínimos
         executor.setMaxPoolSize(10); // Máximo de hilos
         executor.setQueueCapacity(100); // Tareas en cola
         executor.setThreadNamePrefix("AsyncThread-");
