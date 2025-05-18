@@ -8,7 +8,6 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 
 @EnableConfigurationProperties(DefaultUserProperties.class)
 @SpringBootApplication //(scanBasePackages = "co.uniquindio")
-
 public class ProyectoFinalProgramacionAvanzadaApplication {
 
 	public static void main(String[] args) {
