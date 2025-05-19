@@ -38,4 +38,5 @@ src/main/resources/private_key.pem
 ### VS Code ###
 .vscode/
 
+*.pem
 .env
