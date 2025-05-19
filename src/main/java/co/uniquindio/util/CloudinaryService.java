@@ -16,12 +16,28 @@ import java.util.concurrent.CompletableFuture;
 @Service
 public class CloudinaryService {
 
+
+    private final String cloudName;
+    private final String apiKey;
+    private final String apiSecret;
     private final Cloudinary cloudinary;
 
-    public CloudinaryService() {
-        String cloudinaryUrl = CloudinaryConfig.getCloudinaryUrl();
-        this.cloudinary = new Cloudinary(cloudinaryUrl);
-        this.cloudinary.config.secure = true; // Opcional: forzar HTTPS
+    public CloudinaryService(
+            @Value("${cloudinary.cloud-name}") String cloudName,
+            @Value("${cloudinary.api-key}") String apiKey,
+            @Value("${cloudinary.api-secret}") String apiSecret
+    ) {
+        this.cloudName = cloudName;
+        this.apiKey = apiKey;
+        this.apiSecret = apiSecret;
+
+        Map<String, String> config = new HashMap<>();
+        config.put("cloud_name", cloudName);
+        config.put("api_key", apiKey);
+        config.put("api_secret", apiSecret);
+        config.put("secure", "true");
+
+        this.cloudinary = new Cloudinary(config);
     }
     @Async("taskExecutor")
     public CompletableFuture<String> uploadFile(MultipartFile file) {
