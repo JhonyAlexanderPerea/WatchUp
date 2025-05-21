@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -20,14 +21,19 @@ public class ReportHistoryServiceImpl implements ReportHistoryService {
     private final ReportHistoryRepository reportHistoryRepository;
 
     @Override
-    public ReportHistory saveReportHistory(String reportId, String userId, String action, String description) {
-        return reportHistoryRepository.save(new ReportHistory(
+    public CompletableFuture<ReportHistory> saveReportHistory(String reportId, String userId, String action, String description) {
+        try{
+        return CompletableFuture.completedFuture(reportHistoryRepository.save(new ReportHistory(
                 UUID.randomUUID().toString(),
                 reportId,
                 description,
                 LocalDateTime.now(),
                 action,
-                userId));
+                userId)));
+    } catch (Exception e) {
+        return CompletableFuture.failedFuture(e);
+    }
+
     }
 
     @Override

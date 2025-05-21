@@ -35,6 +35,8 @@ public interface ReportService {
 
     void addComment(String reportId, Comment comment);
 
+    @PreAuthorize("hasAuthority('ADMIN') or isAuthenticated()")
     void increaseImport(String reportId, String userId);
+    @PreAuthorize("hasAuthority('ADMIN') or isAuthenticated()")
     void increaseIsFake(String reportId, String userId);
 }

@@ -34,7 +34,7 @@ public class Report {
     private List<Category> categories;
     private ReportStatus status;
     private LocalDateTime creationDate;
-    private List<byte[]> images;
+    private List<String> images;
     private int important;
     private int isFake;
     @DBRef

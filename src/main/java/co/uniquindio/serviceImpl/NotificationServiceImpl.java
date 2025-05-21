@@ -4,6 +4,9 @@ import co.uniquindio.dtos.common.PaginatedContent;
 import co.uniquindio.dtos.response.NotificationResponse;
 import co.uniquindio.dtos.response.PaginatedNotificationResponse;
 import co.uniquindio.enums.NotificationStatus;
+import co.uniquindio.exceptions.AccessDeniedException;
+import co.uniquindio.exceptions.ApiExceptions;
+import co.uniquindio.exceptions.NotFoundException;
 import co.uniquindio.mappers.NotificationMapper;
 import co.uniquindio.model.Notification;
 import co.uniquindio.model.Report;
@@ -19,6 +22,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
 
 @RequiredArgsConstructor
 @Service
@@ -29,13 +33,21 @@ public class NotificationServiceImpl implements NotificationService {
     private final EmailService emailService;
 
     @Override
-    public void makeNotifacationToAll(Report report) {
+    public CompletableFuture<Void> makeNotifacationToAll(Report report) {
+        try{
         List<User> usersNearby = userRepository.findNearUsers(
                 report.getLocation().getX(),
                 report.getLocation().getY(),
                 1000 // Radio en metros
         );
         if (usersNearby != null && !usersNearby.isEmpty()) {
+            try {
+                usersNearby.remove(userRepository.findById(report.getUserId().toString()));
+               usersNearby.stream().anyMatch(user -> user.getId().equals(report.getUserId().toString()) ? usersNearby.remove(user) : true);
+            }catch (Exception e){
+                System.out.println("ERROR INESPERADO, no se encontro al usuario creador del reporte: "
+                        + report.getId() + " en el metodo: makeNotifacationToAll() de la clase: NotificationServiceImpl.java");
+            }
             // 2. Crear notificaciones para cada usuario
             List<Notification> notifications = new ArrayList<>();
             for (User user : usersNearby) {
@@ -54,7 +66,8 @@ public class NotificationServiceImpl implements NotificationService {
                             "http://localhost/reports/" + report.getId()
                     );
                 } catch (MessagingException e) {
-                    throw new RuntimeException("Error al enviar notificacion al usuario: " + user.getFullName());
+                    System.out.println("Error al enviar notificacion al usuario: " + user.getFullName());
+                    //throw new ApiExceptions.EmailSendException("Error al enviar notificacion al usuario: " + user.getFullName());
                 }
 
             }
@@ -68,6 +81,10 @@ public class NotificationServiceImpl implements NotificationService {
         } else {
             System.out.println("NO SE ENCONTRO NINGUN USUARIO NEARBY PARA LA REPORTE: " + report.getId());
         }
+        return CompletableFuture.completedFuture(null);
+    } catch (Exception e) {
+        return CompletableFuture.failedFuture(e);
+    }
     }
 
     @Override
@@ -78,19 +95,19 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public void deleteNotification(String id) {
         notificationRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("No se encontro la notificacion con el id: "+id));
+                .orElseThrow(()->new NotFoundException("No se encontro la notificacion con el id: "+id));
         notificationRepository.deleteById(id);
     }
 
     @Override
     public NotificationResponse changeNotificationStatus(String id, String userId) {
         Notification notification = notificationRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("No se encontro la notificacion con el id: "+id));
+                .orElseThrow(()->new NotFoundException("No se encontro la notificacion con el id: "+id));
         if(notification.getUserId().equals(userId)) {
             notification.setStatus(NotificationStatus.VIEWED);
             notificationRepository.save(notification);
         }else{
-            throw new RuntimeException("No eres el usuario de esta notificacion");
+            throw new AccessDeniedException("No eres el usuario de esta notificacion");
         }
 
         return notificationMapper.toResponse(notification);
@@ -99,7 +116,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     public NotificationResponse getNotification(String id) {
         Notification notification = notificationRepository.findById(id)
-                .orElseThrow(()->new RuntimeException("No se encontro la notificacion con el id: "+id));
+                .orElseThrow(()->new NotFoundException("No se encontro la notificacion con el id: "+id));
         return notificationMapper.toResponse(notification);
     }
 }

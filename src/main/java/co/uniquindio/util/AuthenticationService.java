@@ -6,6 +6,7 @@ import co.uniquindio.dtos.response.TokenResponse;
 import co.uniquindio.dtos.response.UserResponse;
 import co.uniquindio.enums.UserStatus;
 import co.uniquindio.exceptions.ApiExceptions;
+import co.uniquindio.exceptions.NotFoundException;
 import co.uniquindio.model.User;
 import co.uniquindio.repository.PasswordResetTokenRepository;
 import co.uniquindio.repository.UserRepository;
@@ -61,9 +62,9 @@ public class AuthenticationService {
     public boolean isCurrentUser(String id) {
         String username = SecurityContextHolder.getContext()
                 .getAuthentication().getName();
-        return userRepository.findById(id)
-                .map(user -> user.getEmail().equals(username))
-                .orElse(false);
+        User currentUser = userRepository.findUserByEmail(username)
+                .orElseThrow(() -> new NotFoundException("Usuario no encontrado"));
+        return currentUser.getId().equals(id) ;
 
     }
 

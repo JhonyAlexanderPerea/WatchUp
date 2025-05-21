@@ -16,7 +16,7 @@ public record ReportRequest (
         String description,
         @NotNull
         List<String> categories,
-        @NotBlank
+        @NotNull
         Location location
 ){
 }
